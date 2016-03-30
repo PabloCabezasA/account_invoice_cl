@@ -167,6 +167,9 @@ class account_invoice(osv.osv):
             raise openerp.exceptions.Warning('Error al crear xml. Favor crear parametros Numero de resolucion de compania')
         elif not company.fecharesolucion:
             raise openerp.exceptions.Warning('Error al crear xml. Favor crear parametros Fecha de resolucion de compania')
+        elif not  company.rutenvia:                
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo rut envio en company')            
+
 #        elif not company.p12pass:
 #            raise openerp.exceptions.Warning('Error al crear la factura. Favor crear parametros password p12 de compania')
 
@@ -309,7 +312,7 @@ class account_invoice(osv.osv):
                 'rutacaf':  par_firmador.pathfolio + par_caf.export_filename,
                 'fecharesolucion': str(invoice.company_id.fecharesolucion), 
                 'nroresolucion': str(invoice.company_id.nroresolucion), 
-                'rutenvio': self.validar_rut(invoice.company_id.vat), 
+                'rutenvio': self.validar_rut(invoice.company_id.rutenvia), 
                 'pathbase': par_firmador.pathbase, 
                 'modelo' : objeto,
                 }

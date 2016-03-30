@@ -9,7 +9,8 @@
 		<field name="arch" type="xml">
 			<xpath expr="//notebook" position="inside">
 				<page string="Facturacion Electronica">
-                <group>			    
+                <group>
+                	<field name="rutenvia" />			    
 					<field name="acteco"/>		
 					<field name="fecharesolucion"/>		
 					<field name="nroresolucion"/>							

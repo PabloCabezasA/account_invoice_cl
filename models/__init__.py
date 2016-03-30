@@ -7,7 +7,6 @@ import mail_message
 import account_invoice_dte
 import config_dte_fact
 import res_users
-import partner
 import firmador
 import stock_picking
 import product_product

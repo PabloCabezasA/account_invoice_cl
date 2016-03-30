@@ -106,7 +106,7 @@ class stock_picking(osv.osv):
                 'rutacaf':  par_firmador.pathfolio + par_caf.export_filename,
                 'fecharesolucion': str(picking.company_id.fecharesolucion), 
                 'nroresolucion': str(picking.company_id.nroresolucion), 
-                'rutenvio': self.pool.get('account.invoice').validar_rut(picking.company_id.vat), 
+                'rutenvio': self.pool.get('account.invoice').validar_rut(picking.company_id.rutenvia), 
                 'pathbase': par_firmador.pathbase, 
                 'modelo' : objeto,
                 }

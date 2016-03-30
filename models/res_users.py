@@ -50,8 +50,7 @@ class res_company(osv.osv):
         'export_filename': fields.char('Nombre del Certificado', size=200),
         'nroresolucion': fields.integer('Numero resolucion', size=4),
         'fecharesolucion': fields.date('Fecha resolucion'),
-
-        
+        'rutenvia': fields.char('RUT Envia', size=32, help="Tax Identification Number. Check the box if this contact is subjected to taxes. Used by the some of the legal statements."),
                 
     }
     
@@ -87,6 +86,16 @@ class res_company(osv.osv):
         fh.write(base64.b64decode(data['filep12']))
         fh.close()
         
+    def check_vat_company(self, cr, uid, ids,  context=None):
+        partnerObj= self.pool.get("res.partner")
+        for company in self.browse(cr, uid, ids, context):
+            if not company.rutenvia:
+                continue
+            vat_country, vat_number = partnerObj._split_vat(company.rutenvia)
+            check_func = partnerObj.simple_vat_check
+            if not check_func(cr, uid, vat_country, vat_number, context=context):
+                return False
+        return True
 
     def validar_parametros_firmador(self, cr, uid):
         context = {}
@@ -94,6 +103,8 @@ class res_company(osv.osv):
         for acf in acf_obj.browse(cr, uid, acf_obj.search(cr, uid, [], context)):
             return acf
         raise openerp.exceptions.Warning('Error al crear la factura. Favor crear parametros del firmador')
+
+    _constraints = [(check_vat_company, "Rut Envia invalido", ["rutenvia"])]
 
 res_company()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#
