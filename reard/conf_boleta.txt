@@ -1,0 +1,2 @@
+1-Para el reporte de de la boleta a partir del POS remplazar el archivo pos_receipt.rml y pos_receipt.py de /point_if_sale/report/
+ por los adjuntos en esta carpeta

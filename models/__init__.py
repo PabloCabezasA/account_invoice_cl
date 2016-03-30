@@ -1,0 +1,14 @@
+import account_invoice
+import account_invoice_folios
+import account_invoice_emitidos
+import account_config_firma
+import account_journal
+import mail_message
+import account_invoice_dte
+import config_dte_fact
+import res_users
+import partner
+import firmador
+import stock_picking
+import product_product
+#import pos_receipt

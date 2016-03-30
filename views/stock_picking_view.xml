@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>    
+	<record model="ir.ui.view" id="view_picking_out_sii">
+		<field name="name">stock.picking.sii</field>
+		<field name="model">stock.picking.out</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref='stock.view_picking_out_form' />
+		<field name="arch" type="xml">
+		    <xpath expr="/form/header//button[@string='Print Delivery Slip']" position="replace">
+                <button name="print_picking_out" string="Imprimir Guia y enviar a sii" type="object" states="done" class="oe_highlight"/>
+            </xpath>		    		    		    
+ 			
+			<xpath expr="//notebook" position="inside">
+				<page string="Facturacion Electronica">
+                <group>			    
+					<field name="trackid"/>
+					<field name="indicador_bienes"/>															
+					<field name="xml_file" filename="export_filename"/>		
+					<field name="id_documento" />  
+                	<field name="razonref" />												
+				</group>
+				</page>				            
+            </xpath>
+		</field>
+	</record>
+
+		<record model="ir.ui.view" id="view_stock_journal_sii">
+		<field name="name">stock.journal.sii</field>
+		<field name="model">stock.journal</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref='stock.view_stock_journal_form' />
+		<field name="arch" type="xml">
+		    <xpath expr="//field[@name='user_id']" position="after">
+                <field name="code_sii" />
+            </xpath>		    		    		    
+		</field>
+	</record>
+	
+	
+	
+		
+</data>
+</openerp> 

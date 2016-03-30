@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>        
+		<record id="buscar_correo_form" model="ir.ui.view">
+            <field name="name">buscar.correo.form</field>
+            <field name="model">buscar.correo</field>            
+            <field name="arch" type="xml">
+                <form string="SII" version="7.0">
+                    <separator string='Buscar Correos SII' />
+          			<button name='buscar_correos_sii' type='object' string='buscar' />
+                </form>
+            </field>
+        </record>        
+		
+		<record id="correos_recibidos_id" model="ir.actions.act_window">
+            <field name="name">Buscar Facturas</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">buscar.correo</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>    
+                        
+		<menuitem name="Correos Recibidos SII" parent="configuracion_facturacion"
+			id="correos_invoice_dte" action="correos_recibidos_id"/>	
+	</data>
+</openerp>

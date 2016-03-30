@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<!-- Tree Folios Facturas -->
+		<record id="account_invoice_folios_tree" model="ir.ui.view">
+			<field name="name">account.invoice.folios.tree</field>
+			<field name="model">account.invoice.folios</field>
+			<field name="arch" type="xml">
+				<tree string='Folio Facturas'>
+					<field name="code_sii" />
+					<field name="folio_start" />
+					<field name="folio_end" />
+					<field name="date_approve" />
+					<field name="state_folio" />
+				</tree>
+			</field>
+		</record>
+
+		<!-- Form Folios Facturas -->
+		<record id="account_invoice_folios_form" model="ir.ui.view">
+			<field name="name">account.invoice.folios.form</field>
+			<field name="model">account.invoice.folios</field>
+			<field name="arch" type="xml">
+				<form string="Folios" version="7.0">
+					<sheet>
+						<group>
+							<group>
+								<group colspan="2">
+									<separator string="Rango de Folios" />
+								</group>
+								<group colspan="2">
+									<field name="code_sii" />
+									<field name="folio_start" />
+									<field name="folio_end" />
+									<field name="date_approve" />
+									<field name="state_folio" />
+								</group>
+								<group colspan="2">
+									<separator string="Cargar Folio de XML" />
+								</group>
+								<group colspan="2">
+									<group>						
+										<field name="company_id" required='1' />			    
+									    <field name="export_filename" required='1'/>
+										<field name="xml_folio" />
+									</group>
+								</group>
+							</group>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="consulta_folios" model="ir.actions.act_window">
+			<field name="name">Carga de Folios</field>
+			<field name="res_model">account.invoice.folios</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem name="Carga de Folios" parent="configuracion_facturacion"
+			id="facte_consulta_folios" action="consulta_folios" />
+	</data>
+</openerp>

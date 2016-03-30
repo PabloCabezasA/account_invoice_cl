@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		<record id="cpcs_tree" model="ir.ui.view">
+			<field name="name">cpcs.tree</field>
+			<field name="model">codigo.producto.cambio.sujeto</field>
+			<field name="arch" type="xml">
+			<tree string="CPCS">
+					<field name='name' />
+			</tree>
+			</field>
+		</record>
+
+		<record id="cpcs_action" model="ir.actions.act_window">
+			<field name="name">Tipo de Codigos</field>
+			<field name="res_model">codigo.producto.cambio.sujeto</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		
+		<menuitem name="Tipo de Codigos" parent="monitor_documentos"
+			id="cpcs_id" action="cpcs_action" />
+			
+    </data>
+</openerp>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+	<record model="ir.ui.view" id="view_res_company_form2">
+		<field name="name">res.company.form.inherit</field> 
+		<field name="model">res.company</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="base.view_company_form"/>
+		<field name="arch" type="xml">
+			<xpath expr="//notebook" position="inside">
+				<page string="Facturacion Electronica">
+                <group>			    
+					<field name="acteco"/>		
+					<field name="fecharesolucion"/>		
+					<field name="nroresolucion"/>							
+					<field name="export_filename"/>		
+					<field name="filep12"/>		
+					<field name="p12pass"  password="True"/>		
+				</group>
+				</page>				            
+            </xpath>
+		</field>
+	</record>	
+</data>
+</openerp> 

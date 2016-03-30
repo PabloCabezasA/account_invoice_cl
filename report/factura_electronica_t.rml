@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<document filename="factura_electronica">
+	<!-- Formato Documento 	topMargin="0.3cm" rightMargin="0.3cm" leftMargin="0.6cm" bottomMargin="0.3cm"-->
+	<template pageSize="(204.0,842.0)" title="Factura Electronica" author="Pablo Cabezas" allowSplitting="20">
+		<pageTemplate id="main">
+			<frame id="f1" x1="0.0cm" y1="0.0cm" width="204.0" height="842.0"/>
+			<!--
+			<frame id="f2" x1="0.0cm" y1="326.0cm" height="3.5cm" width="7.5cm" showBoundary="0"/>
+			<frame id="f3" x1="0.0cm" y1="324.0cm" height="4.0cm" width="7.5cm" showBoundary="0"/>
+			<frame id="f4" x1="0.0cm" y1="310.0cm" height="5.5cm" width="7.5cm" showBoundary="0"/>
+			<frame id="f5" x1="0.0cm" y1="150.0cm"  height="15.5cm" width="7.5cm" showBoundary="0"/>
+			<frame id="f6" x1="0.0cm" y1="140.0cm"  height="100.0cm" width="7.5cm" showBoundary="0"/>
+			
+			<frame id="f3" x1="0.3cm" y1="20.5cm" height="1.5cm" width="7.5cm" showBoundary="1"/>
+			<frame id="f4" x1="0.5cm" y1="6.5cm" height="16cm" width="20cm" showBoundary="0"/>
+			<frame id="f5" x1="0.5cm" y1="6cm" height="16cm" width="20cm" showBoundary="0"/>
+			<frame id="f6" x1="14.5cm" y1="6cm" height="2.5cm" width="6cm" showBoundary="0"/>
+			<frame id="f7" x1="7cm" y1="1cm" height="3.5cm" width="7cm" showBoundary="0"/>
+			-->
+		</pageTemplate>
+	</template>
+	<stylesheet>
+		<!-- Tabla 2 -->
+		 <blockTableStyle id="info_face">
+			<blockValign value="LEFT"/>
+			<blockAlignment value="LEFT"/>
+			<lineStyle kind="LINEABOVE" colorName="red" start="0,0" stop="0,0" thickness="2"/>
+			<lineStyle kind="LINEBEFORE" colorName="red" start="0,0" stop="0,1" thickness="2"/>
+			<lineStyle kind="LINEAFTER" colorName="red" start="0,0" stop="0,1" thickness="2"/>
+			<lineStyle kind="LINEBELOW" colorName="red" start="0,1" stop="0,1" thickness="2"/>
+
+	</blockTableStyle> 
+		<!-- Tabla  -->
+		<blockTableStyle id="info_face_2">
+			<blockValign value="LEFT"/>
+			<blockAlignment value="LEFT"/>
+<!--
+			<lineStyle kind="LINEABOVE" colorName="black" start="0,0" stop="0,0" thickness="2"/>
+			<lineStyle kind="LINEBEFORE" colorName="black" start="0,0" stop="0,4" thickness="2"/>
+			<lineStyle kind="LINEAFTER" colorName="black" start="0,0" stop="0,4" thickness="2"/>
+			<lineStyle kind="LINEBELOW" colorName="black" start="0,4" stop="0,4" thickness="2"/>
+-->
+		</blockTableStyle>
+		<!-- Tabla 3 -->
+		<blockTableStyle id="info_cliente">
+			<blockValign value="LEFT"/>
+		</blockTableStyle>
+		<!-- Tabla 4 -->
+		<blockTableStyle id="info_detalle">
+			<blockValign value="LEFT"/>
+			<!--<lineStyle kind="GRID" colorName="black" thickness="1"/>-->
+		</blockTableStyle>
+		<!-- Tabla 5 -->
+		<blockTableStyle id="info_detalle2">
+			<blockValign value="LEFT"/>
+		</blockTableStyle>
+		<!-- Tabla 6 -->
+		<blockTableStyle id="info_totales">
+			<blockValign value="LEFT"/>
+			<lineStyle kind="GRID" colorName="black" thickness="1"/>
+		</blockTableStyle>
+		  <blockTableStyle id="Table3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,1" stop="0,1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,1" stop="1,1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,1" stop="3,1"/>
+    </blockTableStyle>
+		<paraStyle name="texto"  fontSize="10" alignment="CENTER" />
+		<paraStyle name="texto2"  fontSize="8" alignment="LEFT" />
+		<paraStyle name="texto3"  fontSize="7" alignment="LEFT" />
+		<paraStyle name="texto4"  fontSize="7.2" alignment="LEFT" />
+		<paraStyle name="texto4_t"  fontSize="7.2" alignment="RIGHT" />
+    	<paraStyle name="texto5"  fontSize="7" alignment="CENTER" />
+    	<paraStyle name="texto6"  fontSize="7" alignment="LEFT" />
+    	<paraStyle name="texto5_bold" fontName="Helvetica-Bold" fontSize="7" alignment="CENTER" />
+    	<paraStyle name="texto6_bold" fontName="Helvetica-Bold" fontSize="6" alignment="LEFT" />
+    	<paraStyle name="texto_foot"  fontSize="5" alignment="CENTER" />
+		<paraStyle name="texto_foot"  fontSize="5" alignment="LEFT" />
+		<paraStyle name="P5" fontName="Courier-Bold" fontSize="10.0" leading="13" alignment="LEFT"/>
+		<paraStyle name="terp_default_9b" fontName="Helvetica" fontSize="7.0" leading="11" alignment="LEFT"/>
+    <paraStyle name="terp_default_Right_9" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT"/>
+    <paraStyle name="terp_default_Bold_9_Right1" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="RIGHT"/>
+    <paraStyle name="terp_default_Bold_9_Right2" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="RIGHT"/>
+    
+		<initialize>
+			<paraStyle name="all" alignment="justify"/>
+		</initialize>
+
+	</stylesheet>
+	<story>
+		[[ [[ repeatIn(objects,'o') ]] ]]
+	   <blockTable >														   
+	   <tr>			   	
+		   	<td>
+			   <blockTable colWidths="50.0">
+			   		<tr>			   	
+		   				<td>
+			   	   			<image height="2cm" width="50.0" >[[ company.logo or removeParentNode('image') ]]</image>
+			   			</td>
+			   		</tr>
+			   </blockTable>
+			</td>
+			<td>
+			   <blockTable style="info_face" colWidths="128.0">
+			   	<tr>			   	
+		   			<td>
+			   			<para style="texto5">FACTURA ELECTRONICA</para>					
+					</td>
+				</tr>
+				<tr>	
+					<td>
+			   			<para style="texto5">NRO : [[ _formato_numero(o.number) ]]</para>					
+					</td>			    
+			    </tr>
+			    <tr>
+					<td>
+						<para style="texto5">SII - [[ o.mem_sii ]]</para>
+					</td>
+				</tr>
+				</blockTable>
+			</td>				
+		</tr>
+	</blockTable>
+	
+	<para style="P5">[[ o.company_id.name ]]</para>	
+    <para style="P5">[[ _rut_emi(o.company_id.vat) ]]</para>
+    
+    <blockTable colWidths="207">			    
+		<tr>
+		<td>
+			<para style="texto6">[[ o.company_id.partner_id.street ]] [[ o.company_id.partner_id.street2 ]] [[ o.company_id.partner_id.city ]]</para>
+		</td>
+			
+		</tr>			
+	</blockTable>
+	<blockTable colWidths="108,38.0,61.0">			    
+				<tr>
+					<td>
+						<para style="texto6">[[ o.company_id.partner_id.state_id.name ]]</para>
+					</td>
+					<td>
+					<para style="texto6_bold">Fono:</para>
+					</td>
+					<td>					
+					  <para style="texto6">[[ o.company_id.partner_id.phone ]]</para>
+					</td>
+				</tr>			
+	</blockTable>		
+		<!-- Información Cliente -->
+	
+	<blockTable colWidths="55.0,149.0">			    
+				<tr>
+					<td>
+						<para style="texto6_bold">SENOR(ES):</para>
+					</td>
+					<td>
+						<para style="texto6">[[ o.partner_id.name ]]</para>
+					</td>
+				</tr>			
+	</blockTable>
+	<blockTable colWidths="30.25,70.25,50.25,50.25">			    
+				<tr>
+					<td>
+					<para style="texto6_bold">RUT:</para>
+					</td>
+					<td>
+						[[ repeatIn(rut_cli(o.id), 'te') ]]
+						<para style="texto6">[[ (te['rut']) ]]</para>
+					</td>
+					<td>
+					<para style="texto6_bold">CIUDAD:</para>
+					</td>
+					<td>
+						<para style="texto6">[[ o.partner_id.city ]]</para>
+					</td>		
+				</tr>			
+	</blockTable>
+	
+	<blockTable colWidths="55.0,149.0">			    
+				<tr>
+					<td>
+						<para style="texto6_bold">DIRECCION:</para>
+					</td>
+					<td>
+						<para style="texto6">[[ o.partner_id.street ]] [[ o.partner_id.street2 ]]</para>
+					</td>
+				</tr>			
+	</blockTable>
+	<blockTable colWidths="30.0,90.0,40.0,45.0">			    
+				<tr>
+					<td>
+						<para style="texto6_bold">SUC:</para>
+					</td>
+					<td>
+						<para style="texto6">[[ o.company_id.name ]]</para>
+					</td>
+					<td>
+					<para style="texto6_bold">Fono:</para>
+					</td>
+					<td>
+						<para style="texto6">[[ o.partner_id.phone ]]</para>
+					</td>
+				</tr>			
+	</blockTable>
+	<blockTable colWidths="55.0,149.0">			    
+				<tr>
+					<td>
+						<para style="texto6_bold">GIRO:</para>
+					</td>
+					<td>
+						<para style="texto6">[[ o.partner_id.giro ]]</para>
+					</td>
+				</tr>			
+	</blockTable>
+	
+	
+	    <blockTable colWidths="45.0,78.0,38.0,50.0" style="Table3">
+      <tr>
+      	<td>
+          <para style="P5">Cod</para>
+        </td>
+        <td>
+          <para style="P5">Descripcion</para>
+        </td>
+        <td>
+          <para style="P7">Cant</para>
+        </td>
+        <td>
+          <para style="P7">Precio</para>
+        </td>
+      </tr>
+      <tr>
+      <td>
+      <para style="terp_default_9b">[[ te['codigo'] ]]</para>
+        </td>
+        <td>
+          <para style="P1">[[ repeatIn(fac_det(o.id), 'te') ]]</para>
+          <para style="terp_default_9b">[[ te['descripcion'] ]]</para>
+        </td>
+        <td>
+          <para style="texto4">[[ te['cantidad'] ]]</para>
+        </td>
+        <td>
+          <para style="texto5">[[ te['valor'] ]]</para>
+        </td>
+      </tr>
+    </blockTable>
+	
+	
+			<section>
+			<!-- Información Adicional y Totales -->
+			<blockTable style="info_totales" rowHeights="0.7cm" colWidths="2.5cm,3.5cm" >
+				<tr>
+					<td>
+						<para style="texto4_t">NETO</para>
+					</td>
+					<td>
+						<para style="texto5">[[ o.amount_untaxed ]]</para>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<para style="texto4_t">I.V.A. 19%</para>
+					</td>
+					<td>
+						<para style="texto5">[[ o.amount_tax]]</para>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<para style="texto4_t">TOTAL</para>
+					</td>
+					<td>
+						<para style="texto5">[[ o.amount_total ]]</para>
+					</td>
+				</tr>
+			</blockTable>
+		</section>
+		<spacer length="6"/>
+			<section>
+			[[ repeatIn(data_te(o.id), 'te') ]]
+			<blockTable >
+				<tr>
+					<td><image height="2cm" width="5cm" >[[ (te['img']) ]]</image></td>
+				</tr>
+			</blockTable>
+		<spacer length="6"/>
+		<blockTable colWidths="6cm" rowHeights="0.5cm,0.5cm">
+			<tr>
+				<td><para style="texto_foot">Timbre Electronico SII</para></td>
+			</tr>
+			<tr>
+				<td><para style="texto_foot">Res. 7 2009-01-16 - Verifique documento www.sii.cl</para></td>
+			</tr>
+		</blockTable>
+		</section>
+	</story>
+</document>

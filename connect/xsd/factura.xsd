@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	attributeFormDefault="unqualified" elementFormDefault="qualified">
+	<xs:element name="DTE" type="DTEType" />
+	<xs:complexType name="IdDocType">
+		<xs:sequence>
+			<xs:element type="xs:byte" name="TipoDTE" />
+			<xs:element type="xs:int" name="Folio" />
+			<xs:element type="xs:date" name="FchEmis" />
+			<xs:element type="xs:string" name="FmaPago" />
+			<xs:element type="xs:date" name="FchVenc" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EmisorType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="RUTEmisor" />
+			<xs:element type="xs:string" name="RzSoc" />
+			<xs:element type="xs:string" name="GiroEmis" />
+			<xs:element type="xs:int" name="Acteco" />
+			<xs:element type="xs:string" name="DirOrigen" />
+			<xs:element type="xs:string" name="CmnaOrigen" />
+			<xs:element type="xs:byte" name="CdgVendedor" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ReceptorType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="RUTRecep" />
+			<xs:element type="xs:string" name="RzSocRecep" />
+			<xs:element type="xs:string" name="GiroRecep" />
+			<xs:element type="xs:string" name="Contacto" />
+			<xs:element type="xs:string" name="DirRecep" />
+			<xs:element type="xs:string" name="CmnaRecep" />
+			<xs:element type="xs:string" name="CiudadRecep" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TotalesType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="MntNeto" />
+			<xs:element type="xs:string" name="MntExe" />
+			<xs:element type="xs:string" name="TasaIVA" />
+			<xs:element type="xs:string" name="IVA" />
+			<xs:element type="xs:string" name="MntTotal" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EncabezadoType">
+		<xs:sequence>
+			<xs:element type="IdDocType" name="IdDoc" />
+			<xs:element type="EmisorType" name="Emisor" />
+			<xs:element type="ReceptorType" name="Receptor" />
+			<xs:element type="TotalesType" name="Totales" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CdgItemType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="TpoCodigo" />
+			<xs:element type="xs:string" name="VlrCodigo" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DetalleType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="NroLinRef" minOccurs="0" />
+			<xs:element type="xs:string" name="TpoDocRef" minOccurs="0" />
+			<xs:element type="xs:string" name="FolioRef" minOccurs="0" />
+			<xs:element type="xs:string" name="FchRef" minOccurs="0" />
+			<xs:element type="xs:string" name="RazonRef" minOccurs="0" />
+			<xs:element type="xs:byte" name="NroLinDet" minOccurs="0" />
+			<xs:element type="CdgItemType" name="CdgItem" minOccurs="0" />
+			<xs:element type="xs:string" name="NmbItem" minOccurs="0" />
+			<xs:element type="xs:float" name="DscItem" minOccurs="0" />
+			<xs:element type="xs:string" name="UnmdRef" minOccurs="0" />
+			<xs:element type="xs:float" name="QtyItem" minOccurs="0" />
+			<xs:element type="xs:float" name="PrcItem" minOccurs="0" />
+			<xs:element type="xs:float" name="MontoItem" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ReferenciaType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="NroLinRef" minOccurs="0" />
+			<xs:element type="xs:string" name="TpoDocRef" minOccurs="0" />
+			<xs:element type="xs:string" name="FolioRef" minOccurs="0" />
+			<xs:element type="xs:string" name="FchRef" minOccurs="0" />
+			<xs:element type="xs:string" name="RazonRef" minOccurs="0" />
+			<xs:element type="xs:byte" name="NroLinDet" minOccurs="0" />
+			<xs:element type="CdgItemType" name="CdgItem" minOccurs="0" />
+			<xs:element type="xs:string" name="NmbItem" minOccurs="0" />
+			<xs:element type="xs:float" name="DscItem" minOccurs="0" />
+			<xs:element type="xs:string" name="UnmdRef" minOccurs="0" />
+			<xs:element type="xs:float" name="QtyItem" minOccurs="0" />
+			<xs:element type="xs:float" name="PrcItem" minOccurs="0" />
+			<xs:element type="xs:float" name="MontoItem" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RNGType">
+		<xs:sequence>
+			<xs:element type="xs:int" name="D" />
+			<xs:element type="xs:int" name="H" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RSAPKType">
+		<xs:sequence>
+			<xs:element type="xs:string" name="M" />
+			<xs:element type="xs:string" name="E" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DAType">
+		<xs:sequence>
+			<xs:element type="xs:int" name="RE" />
+			<xs:element type="xs:string" name="RS" />
+			<xs:element type="xs:byte" name="TD" />
+			<xs:element type="RNGType" name="RNG" />
+			<xs:element type="xs:date" name="FA" />
+			<xs:element type="RSAPKType" name="RSAPK" />
+			<xs:element type="xs:short" name="IDK" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FRMAType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="algoritmo" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="CAFType">
+		<xs:sequence>
+			<xs:element type="DAType" name="DA" />
+			<xs:element type="FRMAType" name="FRMA" />
+		</xs:sequence>
+		<xs:attribute type="xs:float" name="version" />
+	</xs:complexType>
+	<xs:complexType name="DDType">
+		<xs:sequence>
+			<xs:element type="xs:float" name="RE" />
+			<xs:element type="xs:byte" name="TD" />
+			<xs:element type="xs:int" name="F" />
+			<xs:element type="xs:date" name="FE" />
+			<xs:element type="xs:string" name="RR" />
+			<xs:element type="xs:string" name="RSR" />
+			<xs:element type="xs:float" name="MNT" />
+			<xs:element type="xs:string" name="IT1" />
+			<xs:element type="CAFType" name="CAF" />
+			<xs:element type="xs:date" name="TSTED" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FRMTType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="algoritmo" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="TEDType">
+		<xs:sequence>
+			<xs:element type="DDType" name="DD" />
+			<xs:element type="FRMTType" name="FRMT" />
+		</xs:sequence>
+		<xs:attribute type="xs:float" name="version" />
+	</xs:complexType>
+	<xs:complexType name="DocumentoType">
+		<xs:choice maxOccurs="unbounded" minOccurs="0">
+			<xs:element type="EncabezadoType" name="Encabezado" />
+			<xs:element type="DetalleType" name="Detalle" />
+			<xs:element type="ReferenciaType" name="Referencia" />
+			<xs:element type="TEDType" name="TED" />
+			<xs:element type="xs:string" name="TmstFirma" />
+		</xs:choice>
+		<xs:attribute type="xs:string" name="ID" />
+	</xs:complexType>
+	<xs:complexType name="DTEType">
+		<xs:sequence>
+			<xs:element type="DocumentoType" name="Documento" />
+		</xs:sequence>
+		<xs:attribute type="xs:float" name="version" />
+	</xs:complexType>
+</xs:schema>

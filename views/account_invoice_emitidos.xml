@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+   		<!-- Documentos Emitidos Vista Tree --> 
+		<record id="doc_emitidos_tree" model="ir.ui.view">
+			<field name="name">account.invoice.emitidos.tree</field>
+			<field name="model">account.invoice.emitidos</field>
+			<field name="arch" type="xml">
+				<tree string="Emitidos" create="false" delete="false" edit="false" >
+					<field name='invoice' />
+					<field name='code_sii' />
+					<field name='date' />
+					<field name='state' />
+					<field name='observacion' />										
+				</tree>
+			</field>
+		</record>
+
+		<record id="doc_emitidos_action" model="ir.actions.act_window">
+			<field name="name">Documentos Emitidos</field>
+			<field name="res_model">account.invoice.emitidos</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+		</record>
+		
+		<menuitem name="Documentos Emitidos" parent="monitor_documentos"
+			id="doc_emitidos" action="doc_emitidos_action" />
+			
+    </data>
+</openerp>

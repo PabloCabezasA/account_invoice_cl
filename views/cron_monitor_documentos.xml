@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="get_document_action" model="ir.cron">
+            <field name="name">Traer Documentos Firmados</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="True"/>
+            <field name="model">account.invoice.emitidos</field>
+            <field name="function">_fetch_document</field>
+            <field name="args">()</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</openerp>

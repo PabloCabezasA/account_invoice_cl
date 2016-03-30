@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<!-- Configuración Firmador Vista Tree --> 
+		<record id="conf_facte_form" model="ir.ui.view">
+			<field name="name">account.config.firma.form</field>
+			<field name="model">account.config.firma</field>
+			<field name="arch" type="xml">
+				<form string="Información de Conexión" version="7.0">
+					<sheet>
+						<group colspan="4">
+							<separator string="Información de Conexión" />
+						</group>
+						<group colspan="2">
+							<field name="pathbase" />
+							<field name='pathfolio' />
+							<field name='pathcertificado' />
+							<field name='type_send' />														
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<!-- Configuración Firmador Vista Form --> 
+		<record id="conf_facte_tree" model="ir.ui.view">
+			<field name="name">account.config.firma.tree</field>
+			<field name="model">account.config.firma</field>
+			<field name="arch" type="xml">
+				<tree string='data'>
+							<field name="pathbase" />
+							<field name='pathfolio' />
+							<field name='pathcertificado' />
+							<field name='type_send' />														
+				</tree>
+			</field>
+		</record>
+
+		<record id="confg_firm" model="ir.actions.act_window">
+			<field name="name">Configurar Firmador</field>
+			<field name="res_model">account.config.firma</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		
+		<menuitem name="Configuración Firmador" parent="configuracion_facturacion"
+			id="facte_firma" action="confg_firm" />
+	</data>
+</openerp>

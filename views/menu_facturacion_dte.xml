@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<openerp>
+<data> 	
+	<!--  Menu Padre   --> 	
+    <menuitem id="facturacion_root" name="Facturacion Electronica"/>
+    	<!--  Indices  -->
+    	<menuitem name="Monitor de Documentos" id="monitor_documentos"  parent="facturacion_root"/>
+    	<menuitem name="Monitor de Correos" id="monitor_correos"  parent="facturacion_root"/>
+    	<menuitem name="Libro Electronico" id="libro_electronico"  parent="facturacion_root"/>
+    	<menuitem name="Sesion de Documentos" id="sesion_documentos"  parent="facturacion_root"/>
+    	<menuitem name="Configuraciones" id="configuracion_facturacion"  parent="facturacion_root"/>
+    	
+    <!--     --> 
+    <!-- <menuitem name="Buscar Empresas en SII" parent="fac_elect" id="buscar_empresa_sii" action="action_Buscar en sii"/> --> 
+    <!-- <menuitem name="Estado Facturas" parent="fac_elect" id="state_invoice_cl" action="invoice_st_action"/>-->
+    <!-- <menuitem name="Facturas Recibidas" parent="fac_elect" id="invoice_el_cl" action="invoice_in_action"/>-->
+	<!--     -->
+    <!-- <menuitem name="Configuracion F.Electrónica" id="conf_fac_elect"  parent="account_invoice_cl.facturacion_padre"/> -->
+	 <!-- <menuitem name="Cuentas Por Defecto" parent="facturacion_root" id="conf_fact_account" action="conf_invoice_dte_action"/>--> 
+	<!-- <menuitem name="Configuracion" parent="conf_fac_elect" id="fact_estado" action="conf_facte"/> -->
+	<!-- <menuitem name="Codigos Sii" parent="conf_fac_elect" id="account_journal_cl" action="account_journal_cl_action"/> -->
+</data>
+</openerp>    

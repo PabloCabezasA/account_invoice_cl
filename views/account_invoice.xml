@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	<record model="ir.ui.view" id="account_invoice_supplier_form_id">
+			<field name="name">account.invoice.supplier.form</field>
+			<field name="model">account.invoice</field>
+			<field name='inherit_id' ref='account.invoice_supplier_form' />
+			<field name="arch" type="xml">
+				<xpath expr="//button[@name='action_cancel_draft']" position="after">				
+					<button name="print_for_idiots" class="oe_highlight" context="{'journal_id':journal_id}" string="Imprimir" type="object" />
+				</xpath>
+							
+				<xpath expr="//field[@name='period_id']" position="after">					                                       
+	                <field name="xml_file" filename="export_filename"/>                    
+				</xpath>
+				
+				<xpath expr="//notebook" position="inside">
+					<page string="SII Estados">
+					    <group>
+							<field name="trackid" />
+							<field name="id_documento" />
+							<field name="razonref" />																		
+						</group>
+						<field name="state_emitidos" />	    
+					</page>
+				</xpath>
+			</field>
+		</record>
+
+			<record model="ir.ui.view" id="account_invoice_account_form_id">
+			<field name="name">account.invoice.account.invoice.form</field>
+			<field name="model">account.invoice</field>
+			<field name='inherit_id' ref='account.invoice_form' />
+			<field name="arch" type="xml">
+				<xpath expr="//button[@name='invoice_print']" position="replace">			
+					<button name="print_for_idiots" class="oe_highlight" context="{'journal_id':journal_id}" string="Imprimir" type="object" />
+				</xpath>
+			
+				<xpath expr="//field[@name='move_id']" position="after">					                                       
+                        <field name="xml_file" filename="export_filename"/>   
+				</xpath>
+				<xpath expr="//notebook" position="inside">
+					<page string="SII Estados">					    
+					    <group>
+							<field name="trackid" />	    					    					    					    
+							<field name="id_documento" />
+							<field name="razonref" />							
+						</group>
+						<field name="state_emitidos" />	    					    					    
+					</page>
+				</xpath>
+								
+			</field>	
+			</record>
+    </data>
+</openerp>

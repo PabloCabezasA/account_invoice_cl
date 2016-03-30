@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+						
+		<record id="view_config_dte_invoice_form" model="ir.ui.view">
+	    	<field name="name">config.dte.invoice.form</field>
+	        <field name="model">config.dte.invoice</field>
+	        <field name="arch" type="xml">
+		        <form string="Cuentas por Defecto" version="7.0">
+		        	<sheet>
+		        		<group colspan="2" >
+                        	<group>
+                        		<separator string="Cuenta Cliente" colspan="2" />                                                
+                        		<newline/>
+                        		<field name="account_client_default"/>
+                        		<field name="iva_debito"/>				                        		
+                        	</group>
+                    		<group>                                                                   
+								<separator string="Cuenta Proveedor" colspan="2" />                        		                        
+                        		<field name="account_proveedor_default"/>
+                        		<field name="iva_credito"/>
+                    		</group>
+                    		<field name="state"/>
+                    	</group>
+			        </sheet>
+				</form>
+			</field>
+        </record>
+        
+		<record id="config_dte_invoice_tree" model="ir.ui.view">
+            <field name="name">config.dte.invoice.tree</field>
+            <field name="model">config.dte.invoice</field>
+            <field name="arch" type="xml">
+                <tree string='Cuentas por Defecto'>
+                	<field name="account_client_default"/>
+                    <field name="account_proveedor_default"/>
+                    <field name="state" />		
+                </tree>
+            </field>
+        </record>
+        
+        <record id="conf_invoice_dte_action" model="ir.actions.act_window">
+            <field name="name">Cuentas Por Defecto</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">config.dte.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>    
+                        
+
+		<menuitem name="Cuentas Por Defecto" parent="configuracion_facturacion"
+			id="conf_cuenta_defecto" action="conf_invoice_dte_action" />
+        
+        	
+	</data>
+</openerp>
