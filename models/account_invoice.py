@@ -355,17 +355,17 @@ class account_invoice(osv.osv):
 
     def limpiar_campos_receptor_xml(self, receptor):                        
         if not  receptor.vat:                
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo rut proveedor i/o cliente')            
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo rut en el proveedor i/o cliente')            
         if not receptor.name:
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo nombre proveedor i/o cliente')        
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo nombre en el proveedor i/o cliente')        
         if not receptor.giro:
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo giro proveedor i/o cliente')            
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo giro en el proveedor i/o cliente')            
         if not receptor.street:
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo direccion proveedor i/o cliente')        
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo direccion en el  proveedor i/o cliente')        
         if not receptor.email:
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo correo proveedor i/o cliente')        
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo correo en el proveedor i/o cliente')        
         if not receptor.state_id:
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo Estado proveedor i/o cliente')         
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo Estado en el proveedor i/o cliente')         
 
     
     def limpiar_campo_slash(self,numero):
