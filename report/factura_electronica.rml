@@ -47,11 +47,11 @@
 		</blockTableStyle>
 
 <!--		
-		<paraStyle name="texto" fontName="Arial" fontSize="10" alignment="CENTER" />
-		<paraStyle name="texto2" fontName="Arial" fontSize="5" alignment="LEFT" />
-		<paraStyle name="texto3" fontName="Arial" fontSize="5" alignment="CENTER" />
-		<paraStyle name="texto4" fontName="Arial" fontSize="3" alignment="CENTER" />
-		<paraStyle name="texto5" fontName="Arial" fontSize="7" alignment="CENTER" />
+		<paraStyle name="texto" fontName="Helvetica" fontSize="10" alignment="CENTER" />
+		<paraStyle name="texto2" fontName="Helvetica" fontSize="5" alignment="LEFT" />
+		<paraStyle name="texto3" fontName="Helvetica" fontSize="5" alignment="CENTER" />
+		<paraStyle name="texto4" fontName="Helvetica" fontSize="3" alignment="CENTER" />
+		<paraStyle name="texto5" fontName="Helvetica" fontSize="7" alignment="CENTER" />
 -->		
 		<paraStyle name="texto"  fontSize="10" alignment="CENTER" />
 		<paraStyle name="texto2"  fontSize="5" alignment="LEFT" />

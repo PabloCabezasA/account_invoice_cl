@@ -76,7 +76,6 @@ class account_invoice(osv.osv):
             ted = self.pool.get('firmador.firmador').fimar_cliente(cr, uid, [xml_data.id], data, context=None)        
         except:            
             os.remove(path)
-        os.remove(path)            
         self.funcion_pdf47(cr, uid, ids, ted['respuesta'])
 
     def print_for_idiots(self,cr,uid,ids,context=None):
@@ -320,7 +319,7 @@ class account_invoice(osv.osv):
         return data
     
     def funcion_pdf47(self,cr,uid,ids,te_factura):
-        path = os.getcwd() + '/openerp/v7/addons_econube/account_invoice_cl/%s'
+        path = os.getcwd() + '/%s'
         barcode('pdf417', te_factura, options=dict(eclevel=5, columns=15, rows=15), scale=2, data_mode='8bits').save(path % 'te_factura.png')
         with open(path % 'te_factura.png', "rb") as image_file:
             binary = base64.b64encode(image_file.read())

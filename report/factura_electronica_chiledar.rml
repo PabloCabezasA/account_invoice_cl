@@ -93,23 +93,23 @@
 		<blockTableStyle id="info_compania">
 <!--      	<blockValign value="MIDDLE"/> -->      		
 		</blockTableStyle>
-		<paraStyle name="titulo" fontName="Calibri Bold" fontSize="12" alignment="LEFT" />
-		<paraStyle name="text_11" fontName="Calibri" fontSize="11" alignment="LEFT" />
-		<paraStyle name="text_11_fb" fontName="Calibri Bold" fontSize="11" alignment="LEFT" />
-		<paraStyle name="text_11_c" fontName="Calibri" fontSize="11" alignment="CENTER" />
-		<paraStyle name="text_10" fontName="Calibri" fontSize="10" alignment="LEFT" />
-		<paraStyle name="text_8" fontName="Calibri" fontSize="8" alignment="LEFT" />
-		<paraStyle name="text_8_c" fontName="Calibri" fontSize="8" alignment="CENTER" />
-		<paraStyle name="text_7" fontName="Calibri" fontSize="7" alignment="LEFT" />
-		<paraStyle name="text_16_c"  fontName="Calibri Bold" fontSize="16" alignment="CENTER" />
+		<paraStyle name="titulo" fontName="Helvetica-Bold" fontSize="11" alignment="LEFT" />
+		<paraStyle name="text_11" fontName="Helvetica" fontSize="9" alignment="LEFT" />
+		<paraStyle name="text_11_fb" fontName="Helvetica-Bold" fontSize="11" alignment="LEFT" />
+		<paraStyle name="text_11_c" fontName="Helvetica" fontSize="11" alignment="CENTER" />
+		<paraStyle name="text_10" fontName="Helvetica" fontSize="10" alignment="LEFT" />
+		<paraStyle name="text_8" fontName="Helvetica" fontSize="8" alignment="LEFT" />
+		<paraStyle name="text_8_c" fontName="Helvetica" fontSize="8" alignment="CENTER" />
+		<paraStyle name="text_7" fontName="Helvetica" fontSize="7" alignment="LEFT" />
+		<paraStyle name="text_16_c"  fontName="Helvetica-Bold" fontSize="12" alignment="CENTER" />
 		
-		<paraStyle name="texto3_wh" fontName="Calibri Bold" fontSize="11" alignment="CENTER" />
-		<paraStyle name="texto3_wh_left"  fontName="Calibri Bold" fontSize="11" alignment="LEFT" />
-		<paraStyle name="texto3_wh_right"  fontName="Calibri Bold" fontSize="11" alignment="RIGHT" />
+		<paraStyle name="texto3_wh" fontName="Helvetica-Bold" fontSize="11" alignment="CENTER" />
+		<paraStyle name="texto3_wh_left"  fontName="Helvetica-Bold" fontSize="11" alignment="LEFT" />
+		<paraStyle name="texto3_wh_right"  fontName="Helvetica-Bold" fontSize="11" alignment="RIGHT" />
 
-		<paraStyle name="texto3_left"  fontName="Calibri" fontSize="11" alignment="LEFT" />
-		<paraStyle name="texto3_center"  fontName="Calibri" fontSize="11" alignment="CENTER" />
-		<paraStyle name="texto3_right"  fontName="Calibri" fontSize="11" alignment="RIGHT" />
+		<paraStyle name="texto3_left"  fontName="Helvetica" fontSize="11" alignment="LEFT" />
+		<paraStyle name="texto3_center"  fontName="Helvetica" fontSize="11" alignment="CENTER" />
+		<paraStyle name="texto3_right"  fontName="Helvetica" fontSize="11" alignment="RIGHT" />
 		<initialize>
       		<paraStyle name="all" alignment="justify"/>
     	</initialize>
