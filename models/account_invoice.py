@@ -178,6 +178,8 @@ class account_invoice(osv.osv):
         emisor_d = self.pool.get('res.partner').browse(cr, uid, xml_data.company_id.partner_id.id,)
         emisor_d = self.limpiar_campos_emisor_xml(cr, uid, emisor_d)
         self.limpiar_campos_receptor_xml(xml_data.partner_id)
+        if not xml_data.id_documento:
+            raise openerp.exceptions.Warning('Error al crear xml. Favor ingrasar campo Documento Unico')                        
         xml_factura = '<DTE version="1.0">'
         xml_factura += '<Documento ID="'+ xml_data.id_documento +'">' #Identificador único del DTE #Datos de Prueba            
         xml_factura += '<Encabezado>' + '<IdDoc>'        
