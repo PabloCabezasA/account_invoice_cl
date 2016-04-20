@@ -243,7 +243,7 @@ class account_invoice(osv.osv):
             xml_factura += '<UnmdRef>' + unidad + '</UnmdRef>'                
             xml_factura += '<QtyItem>' + str(int(record.quantity)) + '</QtyItem>'
             xml_factura += '<PrcItem>' + str(int(record.price_unit)) + '</PrcItem>'
-            xml_factura += '<MontoItem>' + str(int(record.price_subtotal * (impuesto_obj.amount +1)if record.invoice_line_tax_id else int(record.price_subtotal))) + '</MontoItem>'
+            xml_factura += '<MontoItem>' + str(int(record.price_subtotal))+ '</MontoItem>'
             xml_factura += '</Detalle>'            
             if i == 1:
                 product_te = record.product_id.name
