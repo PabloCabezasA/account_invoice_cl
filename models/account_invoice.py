@@ -162,7 +162,7 @@ class account_invoice(osv.osv):
             raise openerp.exceptions.Warning('Error al crear xml. Favor crear parametros certificado de compania')
         elif not company.export_filename:
             raise openerp.exceptions.Warning('Error al crear xml. Favor crear parametros nombre certificado de compania')
-        elif not company.nroresolucion:
+        elif company.nroresolucion <0:
             raise openerp.exceptions.Warning('Error al crear xml. Favor crear parametros Numero de resolucion de compania')
         elif not company.fecharesolucion:
             raise openerp.exceptions.Warning('Error al crear xml. Favor crear parametros Fecha de resolucion de compania')
