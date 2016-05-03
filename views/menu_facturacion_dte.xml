@@ -9,7 +9,7 @@
     	<menuitem name="Libro Electronico" id="libro_electronico"  parent="facturacion_root"/>
     	<menuitem name="Sesion de Documentos" id="sesion_documentos"  parent="facturacion_root"/>
     	<menuitem name="Configuraciones" id="configuracion_facturacion"  parent="facturacion_root"/>
-    	
+    	<menuitem name="Set De Prueba" id="sii_set_prueba"  parent="facturacion_root"/>    	
     <!--     --> 
     <!-- <menuitem name="Buscar Empresas en SII" parent="fac_elect" id="buscar_empresa_sii" action="action_Buscar en sii"/> --> 
     <!-- <menuitem name="Estado Facturas" parent="fac_elect" id="state_invoice_cl" action="invoice_st_action"/>-->

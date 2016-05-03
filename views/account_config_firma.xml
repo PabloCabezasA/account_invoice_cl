@@ -45,5 +45,50 @@
 		
 		<menuitem name="Configuración Firmador" parent="configuracion_facturacion"
 			id="facte_firma" action="confg_firm" />
+
+ 
+		<record id="conf_siisetdte_form" model="ir.ui.view">
+			<field name="name">sii.set.dte.form</field>
+			<field name="model">sii.set.dte</field>
+			<field name="arch" type="xml">
+				<form string="Set de Prueba" version="7.0">
+					<sheet>
+						<group colspan="2">
+							<field name='company_id'  required="True" />
+							<field name='partner_id'  required="True" />							
+							<field name='qty' readonly="1"/>
+							<field name="xml_file" filename="xml_name" readonly="1"/>														
+						</group>
+						<group colspan="4">
+							<button name='crear_archivo_set' type='object' string='Crear' class="oe_highlight" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+		<record id="conf_siiset_dte_tree" model="ir.ui.view">
+			<field name="name">sii.set.dte.tree</field>
+			<field name="model">sii.set.dte</field>
+			<field name="arch" type="xml">
+				<tree string='data'>
+					<field name='qty' />
+					<field name="xml_file" filename="xml_name" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="setpruebasii_action" model="ir.actions.act_window">
+			<field name="name">CREAR SET</field>
+			<field name="res_model">sii.set.dte</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form,tree</field>
+			<field name="target">new</field>
+		</record>
+		
+		<menuitem name="CREAR SET" parent="sii_set_prueba"
+			id="menu_sii_prueba" action="setpruebasii_action" />
+
+	
 	</data>
 </openerp>

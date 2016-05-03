@@ -60,6 +60,7 @@ class account_invoice(osv.osv):
                 'id_documento' : fields.char('Documento Unico', size=200),
                 'razonref' : fields.char('razon ref', size=200),
                 'state_emitidos': fields.one2many('account.invoice.emitidos','invoice','Facturacion SII', readonly=True),                
+                'to_setest' : fields.boolean('Set de Prueba'),
     }
 
     def print_pdf47(self,cr,uid,ids,context=None):
@@ -280,6 +281,8 @@ class account_invoice(osv.osv):
                     print 'no hay archivo'
                 raise openerp.exceptions.Warning('Error al crear DTE, Fallo en libreria facturisa')
             pathfirma = False
+            if xml_data.to_setest:
+                return True
             if par_firmador.type_send== 'firmar':
                 pathfirma = data['pathbase'] + '/out/dte_otros/xmlfiroc' + self.validar_rut(xml_data.company_id.vat).replace('-','') + str(xml_data.journal_id.code_sii) + str(self.limpiar_campo_slash(xml_data.number)) + '.xml'
             elif par_firmador.type_send== 'firmar_enviar':
@@ -295,7 +298,9 @@ class account_invoice(osv.osv):
 
     def firmado_envio(self, cr, uid, invoice, path, par_caf, par_firmador):
         data = self._info_for_facturador(cr, uid, invoice, par_caf, par_firmador, path, 'account.invoice')        
-        if par_firmador.type_send == 'firmar_enviar':
+        if invoice.to_setest:
+            self.pool.get('firmador.firmador').firmar_dte_prueba_sii(cr, uid, [invoice.id], data, context=None)        
+        elif par_firmador.type_send == 'firmar_enviar':
             self.pool.get('firmador.firmador').firmar_enviar_sii(cr, uid, [invoice.id], data, context=None)
         elif par_firmador.type_send == 'firmar':
             self.pool.get('firmador.firmador').fimar_cliente(cr, uid, [invoice.id], data, context=None)

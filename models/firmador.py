@@ -17,10 +17,54 @@ import json
 from simplejson import JSONEncoder
 #import cherrypy
 import base64
-
+from datetime import datetime
 class firmador_firmador(osv.osv_memory):
     _name = 'firmador.firmador'
-
+    
+    def firmar_set_prueba_sii(self, cr, uid, ids, data, context=None):
+        cert = data['cert']
+        xml =  data['path']
+        passwd = data['passwd']
+        set_xml = '/tmp/SET_%s.xml' % str( datetime.now().strftime('%Y-%m-%d') )
+        pathbase =  data['pathbase']
+        os.chdir(pathbase + '/facturador/')
+        os.system('pwd')
+        resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + xml+ ' ' +  cert + ' ' + passwd + ' > ' + set_xml)
+        return set_xml 
+    
+    def firmar_dte_prueba_sii(self, cr, uid, ids, data, context=None):
+        rutaxmldte =data['rutaxmldte']
+        rutacertpfx = data['rutacertpfx']
+        contcertpxpfx = data['contcertpxpfx']
+        rutacaf = data['rutacaf']
+        fecharesolucion = data['fecharesolucion']
+        nroresolucion = data['nroresolucion']
+        rutenvio = data['rutenvio']
+        rutenviosii = rutenvio
+        pathbase = data['pathbase']
+        mids =  data['document_id']
+        modelo = data['modelo']
+        midom=parse(rutaxmldte)
+        tipodte = midom.getElementsByTagName("TipoDTE")[0].childNodes[0].data
+        rutemisor =  midom.getElementsByTagName("RUTEmisor")[0].childNodes[0].data.replace('-','')
+        foliodte = midom.getElementsByTagName("Folio")[0].childNodes[0].data
+        idDocument = midom.getElementsByTagName("Documento")[0].attributes.get("ID").value
+        pathxmlfirmado = pathbase + '/out/dte_setprueba/'
+        name_file = 'xmlset' + rutemisor + tipodte + foliodte + '.xml'
+        xmlfirmadosii = pathbase + '/out/dte_setprueba/'+ name_file
+        os.chdir(pathbase + '/facturador/')
+        os.system('pwd')
+        resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + rutaxmldte+ ' ' +  rutacertpfx + ' ' +   contcertpxpfx + ' "CAF='+ rutacaf + '" >' + xmlfirmadosii)
+        print 'respuesta firma'
+        print resp_firma
+        if resp_firma != 0:
+            self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Error', 'code_sii': tipodte, 'folio': foliodte,'observacion': 'Fallo al firmar dte'}, context)
+        self.guardar_dte_en_modelo(cr, uid, mids, xmlfirmadosii, modelo, name=name_file)
+        self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Firma DTE SII OK', 'code_sii': str(tipodte), 'folio': str(foliodte),'observacion': 'Proceso de firma DTE'}, context)
+        os.remove(rutaxmldte)        
+        os.chdir(pathbase+'/facturador/')
+        return xmlfirmadosii
+    
     def firmar_enviar_sii(self, cr, uid, ids, data, context=None):
         rutaxmldte =data['rutaxmldte']
         rutacertpfx = data['rutacertpfx']
@@ -110,15 +154,17 @@ class firmador_firmador(osv.osv_memory):
         return respuesta
  
     
-    def guardar_dte_en_modelo(self, cr, uid, ids, archivo, modelo):
+    def guardar_dte_en_modelo(self, cr, uid, ids, archivo, modelo, name = None):
         print 'guardando'
         b64data = ''
+        if name is None:
+            name = 'factura.xml'
         try:
             with open(archivo, 'r') as myfile:
                 b64data = base64.b64encode(myfile.read())
                 myfile.close()
             print b64data
-            self.pool.get(modelo).write(cr, uid, ids, {'xml_file': b64data, 'export_filename' : 'factura.xml' })
+            self.pool.get(modelo).write(cr, uid, ids, {'xml_file': b64data, 'export_filename' : name })
         except:
             print 'fallo al guardar archivo'
 

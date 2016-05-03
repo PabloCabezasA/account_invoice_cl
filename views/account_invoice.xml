@@ -18,8 +18,9 @@
 					<page string="SII Estados">
 					    <group>
 							<field name="trackid" />
-							<field name="id_documento" />
-							<field name="razonref" />																		
+							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
+							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
+							<field name="to_setest" />																		
 						</group>
 						<field name="state_emitidos" />	    
 					</page>
@@ -43,8 +44,9 @@
 					<page string="SII Estados">					    
 					    <group>
 							<field name="trackid" />	    					    					    					    
-							<field name="id_documento" />
-							<field name="razonref" />							
+							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
+							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
+							<field name="to_setest" />																		
 						</group>
 						<field name="state_emitidos" />	    					    					    
 					</page>

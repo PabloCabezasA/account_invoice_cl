@@ -34,6 +34,7 @@
         /home/openerp/lfubu14_64/out/dte_otros
         /home/openerp/lfubu14_64/out/dte_sii
         /home/openerp/lfubu14_64/out/resp_sii
+        /home/openerp/lfubu14_64/out/dte_setprueba
 
     *Todas las rutas deben tener los permisos para el usuario openerp \n 
     
@@ -54,6 +55,18 @@
                condicion : True \n
                secuencia :1 \n
                codigo python : self.mail_enter(cr, uid, object, context) \n
+               
+        Solucion Error:
+            Se debe a un error en libxmlsec , por lo que se debe descargar la version que trae utopic (ubuntu 14.10),
+            poniendo al final de /etc/apt/sources.list lo siguiente:
+            
+            deb http://us.archive.ubuntu.com/ubuntu wily main universe
+            
+            Despues ejecutar
+            
+            aptitude update
+            aptitude install xmlsec1
+        
                     """,
     "depends" : ['base','account','base_vat','product','stock','l10n_cl_partner','l10n_cl_toponyms'],    
 	"data": [
