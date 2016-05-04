@@ -88,7 +88,9 @@ class stock_picking(osv.osv):
 
     def firmado_envio(self, cr, uid, picking, path, par_caf, par_firmador, modelo):
         data = self._info_for_facturador(cr, uid, picking, par_caf, par_firmador, path, modelo)
-        if par_firmador.type_send == 'firmar_enviar':
+        if invoice.to_setest:
+            self.pool.get('firmador.firmador').firmar_dte_prueba_sii(cr, uid, [invoice.id], data, context=None)        
+        elif par_firmador.type_send == 'firmar_enviar':
             self.pool.get('firmador.firmador').firmar_enviar_sii(cr, uid, [picking.id], data, context=None)
         elif par_firmador.type_send == 'firmar':
             ted = self.pool.get('firmador.firmador').fimar_cliente(cr, uid, [picking.id], data, context=None)

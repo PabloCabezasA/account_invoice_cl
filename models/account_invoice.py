@@ -23,6 +23,7 @@ from openerp.osv import fields, osv
 import openerp.exceptions
 from lxml import etree
 import xml.etree.ElementTree as ET
+from xml.sax.saxutils import escape
 import datetime
 from datetime import date
 import time
@@ -198,16 +199,16 @@ class account_invoice(osv.osv):
         xml_factura += '<FchVenc>' + xml_data.date_due + '</FchVenc>'
         xml_factura += '</IdDoc>' + '<Emisor>'
         xml_factura += '<RUTEmisor>'+self.validar_rut(xml_data.company_id.vat)+'</RUTEmisor>' #self.validar_rut(emisor_d['vat'])
-        xml_factura += '<RznSoc>' + emisor_d.name + '</RznSoc>'
-        xml_factura += '<GiroEmis>' + emisor_d.giro + '</GiroEmis>'
+        xml_factura += '<RznSoc>' + self.xmlescape(emisor_d.name) + '</RznSoc>'
+        xml_factura += '<GiroEmis>' + self.xmlescape(emisor_d.giro) + '</GiroEmis>'
         xml_factura += '<Acteco>' + str(xml_data.company_id.acteco) + '</Acteco>' #Codigo de actividad emisor #Datos de prueba
         xml_factura += '<DirOrigen>' + emisor_d.street + '</DirOrigen>'
         xml_factura += '<CmnaOrigen>' + emisor_d.state_id.name + '</CmnaOrigen>'
         xml_factura += '<CdgVendedor>' + str(xml_data.user_id.id) + '</CdgVendedor>'            
         xml_factura += '</Emisor>' + '<Receptor>'
         xml_factura += '<RUTRecep>' + self.validar_rut(xml_data.partner_id.vat) + '</RUTRecep>'
-        xml_factura += '<RznSocRecep>' + xml_data.partner_id.name + '</RznSocRecep>'
-        xml_factura += '<GiroRecep>' + xml_data.partner_id.giro + '</GiroRecep>'
+        xml_factura += '<RznSocRecep>' + self.xmlescape(xml_data.partner_id.name) + '</RznSocRecep>'
+        xml_factura += '<GiroRecep>' + self.xmlescape(xml_data.partner_id.giro) + '</GiroRecep>'
         xml_factura += '<Contacto>' + xml_data.partner_id.email + '</Contacto>'
         xml_factura += '<DirRecep>' + xml_data.partner_id.street + '</DirRecep>'
         xml_factura += '<CmnaRecep>' + xml_data.partner_id.state_id.name + '</CmnaRecep>'
@@ -231,14 +232,14 @@ class account_invoice(osv.osv):
             xml_factura += '<NroLinDet>' + str(i) + '</NroLinDet>' + '<CdgItem>'
             xml_factura += '<TpoCodigo>' + record.product_id.cpcs_id.name + '</TpoCodigo>'
             xml_factura += '<VlrCodigo>' + self.limpiar_campo_guion(record.product_id.default_code) + '</VlrCodigo>' + '</CdgItem>'
-            xml_factura += '<NmbItem>' + record.product_id.name + '</NmbItem>'
+            xml_factura += '<NmbItem>' + self.xmlescape(record.product_id.name) + '</NmbItem>'
             xml_factura += '<DscItem>' + str(int(record.discount if record.discount else 0 )) + '</DscItem>'                
             if record.product_id.uom_id:
                 if len(record.product_id.uom_id.name) > 4:
                      unidad = record.product_id.uom_id.name[:4]                                              
 #                        raise openerp.exceptions.Warning('Unidad de medida demasiado larga max 4 digitos: %s-%s' % (record.product_id.uom_id.name,record.product_id.uom_id.name))
                 else:
-                    unidad = record.product_id.uom_id.name                        
+                    unidad = self.xmlescape(record.product_id.uom_id.name)                        
             else:
                 raise openerp.exceptions.Warning('Favor Ingresar Unidad de Medida para producto : %s' % record.product_id.uom_id.name)                    
             xml_factura += '<UnmdRef>' + unidad + '</UnmdRef>'                
@@ -247,7 +248,7 @@ class account_invoice(osv.osv):
             xml_factura += '<MontoItem>' + str(int(record.price_subtotal))+ '</MontoItem>'
             xml_factura += '</Detalle>'            
             if i == 1:
-                product_te = record.product_id.name
+                product_te = self.xmlescape(record.product_id.name)
             i += 1
         xml_factura += '<Referencia>'            
         xml_factura +='<NroLinRef>1</NroLinRef>'
@@ -295,6 +296,11 @@ class account_invoice(osv.osv):
         if valor == None:
             return ''
         return str(unicodedata.normalize('NFKD', valor).encode('ascii','ignore'))
+
+
+    def xmlescape(self, data):
+        return escape(data)
+
 
     def firmado_envio(self, cr, uid, invoice, path, par_caf, par_firmador):
         data = self._info_for_facturador(cr, uid, invoice, par_caf, par_firmador, path, 'account.invoice')        
