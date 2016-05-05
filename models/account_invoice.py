@@ -66,7 +66,14 @@ class account_invoice(osv.osv):
                             ('1','Solo a los ítems exentos'),                            
                             ('3','Solo a los ítems afectos'),
                             ('4','Descuento afecta a todos')
-                            ],'Tipo de Descuento')
+                            ],'Tipo de Descuento'),
+                'invoicerel_id': fields.many2one('account.invoice','Factura Rel'),
+                'cod_ref' : fields.selection([
+                            ('1','Anula Documento de Referencia'),                            
+                            ('2','Corrige Texto Documento de Referencia'),
+                            ('3','Corrige montos')
+                            ],'Codigo de referencia'),
+
     }
 
     def print_pdf47(self,cr,uid,ids,context=None):
@@ -193,15 +200,9 @@ class account_invoice(osv.osv):
         xml_factura += '<TipoDTE>' + xml_data.journal_id.code_sii + '</TipoDTE>' #Dato de prueba
         xml_factura += '<Folio>' + self.limpiar_campo_slash(xml_data.number) + '</Folio>' #Dato de prueba deveria estar en el rango de folios
         xml_factura += '<FchEmis>' + xml_data.date_invoice + '</FchEmis>'
-        if xml_data.payment_term.name == None:
-            raise openerp.exceptions.Warning('Favor Ingresar Plazo de Pago')
-        else:
-            if xml_data.payment_term.name.lower() == 'immediate payment':
-                forma_pago = '1'
-            else:
-                forma_pago = '2'
-        xml_factura += '<FmaPago>' + forma_pago + '</FmaPago>'
-        xml_factura += '<FchVenc>' + xml_data.date_due + '</FchVenc>'
+        
+        forma_pago = self.validate_method_payment(xml_data)
+        self.validate_header(xml_data, xml_factura, forma_pago)
         xml_factura += '</IdDoc>' + '<Emisor>'
         xml_factura += '<RUTEmisor>'+self.validar_rut(xml_data.company_id.vat)+'</RUTEmisor>' #self.validar_rut(emisor_d['vat'])
         xml_factura += '<RznSoc>' + self.xmlescape(emisor_d.name) + '</RznSoc>'
@@ -228,11 +229,69 @@ class account_invoice(osv.osv):
             xml_factura += '<TasaIVA>'+'0'+'</TasaIVA>'
         xml_factura += '<IVA>' + str(int(xml_data.amount_tax)) + '</IVA>'
         xml_factura += '<MntTotal>' + str(int(xml_data.amount_total)) + '</MntTotal>'
-        xml_factura += '</Totales>' + '</Encabezado>'
+        xml_factura += '</Totales>' + '</Encabezado>'    
 
+        xml_factura, i, product_te = self.validate_detail(xml_data, xml_factura)
+        
+        if xml_data.discount_money:
+            if not xml_data.type_discount:
+                raise openerp.recordexceptions.Warning('Error, Para Descuentos globales ingresar campo tipo de descuento')        
+            percentage = self.get_amount_for_discount_global(xml_data.type_discount, xml_data)
+            xml_factura +='<DscRcgGlobal>'
+            xml_factura +='<NroLinDR>1</NroLinDR>'
+            xml_factura +='<TpoMov>D</TpoMov>'
+            xml_factura +='<TpoValor>%</TpoValor>'
+            xml_factura +='<ValorDR>'+ str(int(percentage)) +'</ValorDR>'
+            if xml_data.type_discount == '1':
+                xml_factura +='<IndExeDR>1</IndExeDR>'
+            xml_factura +='</DscRcgGlobal>'
+        nrolinref = 1
+        xml_factura += '<Referencia>'            
+        xml_factura +='<NroLinRef>'+ str(nrolinref) +'</NroLinRef>'
+        xml_factura +='<TpoDocRef>' + str(xml_data.journal_id.code_sii) + '</TpoDocRef>'
+        xml_factura +='<FolioRef>'+ self.limpiar_campo_slash(xml_data.number) + '</FolioRef>'
+        xml_factura +='<FchRef>'+ str(datetime.datetime.now().strftime("%Y-%m-%d")) +'</FchRef>'
+        if xml_data.razonref:
+            xml_factura +='<RazonRef>'+ xml_data.razonref +'</RazonRef>'
+        xml_factura += '</Referencia>'
+        nrolinref += 1
+        xml_factura = self.validate_references(xml_data, nrolinref,xml_factura)
+        xml_factura += '</Documento>'
+        xml_factura += '</DTE>'
+        xml_factura.encode('ISO-8859-1')
+        return xml_factura
+
+
+    def validate_references(self, xml_data, nrolinref,xml_factura ):
+        if str(xml_data.journal_id.code_sii) in ('56','61'):
+            if not xml_data.cod_ref:
+                raise openerp.exceptions.Warning('Codigo de referencia requerido')
+            xml_factura += '<Referencia>'            
+            xml_factura +='<NroLinRef>'+ str(nrolinref) +'</NroLinRef>'
+            xml_factura +='<TpoDocRef>' + str(xml_data.invoicerel_id.journal_id.code_sii) + '</TpoDocRef>'
+            xml_factura +='<FolioRef>'+ self.limpiar_campo_slash(xml_data.invoicerel_id.number) + '</FolioRef>'
+            xml_factura +='<FchRef>'+ str(datetime.datetime.now().strftime("%Y-%m-%d")) +'</FchRef>'        
+            xml_factura +='<CodRef>'+xml_data.cod_ref+'</CodRef>'
+            xml_factura +='</Referencia>'
+            nrolinref +=1
+        return xml_factura
+    
+    
+    def validate_detail(self, xml_data, xml_factura):
         i = 1
-        for record in xml_data.invoice_line: 
-            self.validar_campos_producto(record.product_id)
+        for record in xml_data.invoice_line:
+            if not record.product_id.cpcs_id:
+                self.validar_campos_producto(record.product_id)
+            elif record.product_id.cpcs_id.name.lower() == 'corrige nc/nd':
+                xml_factura += '<Detalle>'
+                xml_factura += '<NroLinDet>' + str(i) + '</NroLinDet>'
+                xml_factura += '<NmbItem>' + self.xmlescape(record.product_id.name) + '</NmbItem>'
+                xml_factura += '<MontoItem>' + str(int(record.price_subtotal))+ '</MontoItem>'
+                xml_factura += '</Detalle>'                            
+                if i == 1:
+                    product_te = self.xmlescape(record.product_id.name)
+                i += 1
+                continue
             xml_factura += '<Detalle>'
             xml_factura += '<NroLinDet>' + str(i) + '</NroLinDet>' + '<CdgItem>'
             xml_factura += '<TpoCodigo>' + record.product_id.cpcs_id.name + '</TpoCodigo>'
@@ -255,30 +314,26 @@ class account_invoice(osv.osv):
             if i == 1:
                 product_te = self.xmlescape(record.product_id.name)
             i += 1
-        if xml_data.discount_money:
-            if not xml_data.type_discount:
-                raise openerp.recordexceptions.Warning('Error, Para Descuentos globales ingresar campo tipo de descuento')        
-            percentage = self.get_amount_for_discount_global(xml_data.type_discount, xml_data)
-            xml_factura +='<DscRcgGlobal>'
-            xml_factura +='<NroLinDR>1</NroLinDR>'
-            xml_factura +='<TpoMov>D</TpoMov>'
-            xml_factura +='<TpoValor>%</TpoValor>'
-            xml_factura +='<ValorDR>'+ str(int(percentage)) +'</ValorDR>'
-            if xml_data.type_discount == '1':
-                xml_factura +='<IndExeDR>1</IndExeDR>'
-            xml_factura +='</DscRcgGlobal>'
-        xml_factura += '<Referencia>'            
-        xml_factura +='<NroLinRef>1</NroLinRef>'
-        xml_factura +='<TpoDocRef>' + str(xml_data.journal_id.code_sii) + '</TpoDocRef>'
-        xml_factura +='<FolioRef>'+ self.limpiar_campo_slash(xml_data.number) + '</FolioRef>'
-        xml_factura +='<FchRef>'+ str(datetime.datetime.now().strftime("%Y-%m-%d")) +'</FchRef>'
-        if xml_data.razonref:
-            xml_factura +='<RazonRef>'+ xml_data.razonref +'</RazonRef>'
-        xml_factura += '</Referencia>'            
-        xml_factura += '</Documento>'
-        xml_factura += '</DTE>'
-        xml_factura.encode('ISO-8859-1')
-        return xml_factura
+        return xml_factura, i , product_te
+
+    def validate_method_payment(self, xml_data):
+        forma_pago = '1'
+        if xml_data.payment_term.name == None and xml_data.journal_id.code_sii not in ['56','61']:
+            raise openerp.exceptions.Warning('Favor Ingresar Plazo de Pago')
+        elif xml_data.journal_id.code_sii in ['56','61']:
+            pass
+        else:
+            if xml_data.payment_term.name.lower() == 'immediate payment':
+                forma_pago = '1'
+            else:
+                forma_pago = '2'
+        return forma_pago
+
+    def validate_header(self, xml_data, xml_factura, forma_pago):
+        if xml_data.journal_id.code_sii not in ['56','61']:
+            xml_factura += '<FmaPago>' + forma_pago + '</FmaPago>'
+            xml_factura += '<FchVenc>' + xml_data.date_due + '</FchVenc>'
+        
 
     def get_amount_for_discount_global(self, type, invoice):
         amount = 0

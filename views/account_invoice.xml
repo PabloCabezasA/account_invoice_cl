@@ -12,7 +12,9 @@
 							
 				<xpath expr="//field[@name='period_id']" position="after">					                                       
 	                <field name="xml_file" filename="export_filename"/>
-	                <field name="type_discount"/>	                                    
+	                <field name="type_discount"/>
+	                <field name="invoicerel_id" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />	                	                                    
+					<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />
 				</xpath>
 				
 				<xpath expr="//notebook" position="inside">
@@ -41,6 +43,8 @@
 				<xpath expr="//field[@name='move_id']" position="after">					                                       
                         <field name="xml_file" filename="export_filename"/>
                         <field name="type_discount"/>   
+                        <field name="invoicerel_id" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />
+						<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />                        
 				</xpath>
 				<xpath expr="//notebook" position="inside">
 					<page string="SII Estados">					    
