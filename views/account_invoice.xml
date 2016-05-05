@@ -11,7 +11,8 @@
 				</xpath>
 							
 				<xpath expr="//field[@name='period_id']" position="after">					                                       
-	                <field name="xml_file" filename="export_filename"/>                    
+	                <field name="xml_file" filename="export_filename"/>
+	                <field name="type_discount"/>	                                    
 				</xpath>
 				
 				<xpath expr="//notebook" position="inside">
@@ -38,7 +39,8 @@
 				</xpath>
 			
 				<xpath expr="//field[@name='move_id']" position="after">					                                       
-                        <field name="xml_file" filename="export_filename"/>   
+                        <field name="xml_file" filename="export_filename"/>
+                        <field name="type_discount"/>   
 				</xpath>
 				<xpath expr="//notebook" position="inside">
 					<page string="SII Estados">					    

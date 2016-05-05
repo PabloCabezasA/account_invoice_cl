@@ -62,6 +62,11 @@ class account_invoice(osv.osv):
                 'razonref' : fields.char('razon ref', size=200),
                 'state_emitidos': fields.one2many('account.invoice.emitidos','invoice','Facturacion SII', readonly=True),                
                 'to_setest' : fields.boolean('Set de Prueba'),
+                'type_discount' : fields.selection([
+                            ('1','Solo a los ítems exentos'),                            
+                            ('3','Solo a los ítems afectos'),
+                            ('4','Descuento afecta a todos')
+                            ],'Tipo de Descuento')
     }
 
     def print_pdf47(self,cr,uid,ids,context=None):
@@ -250,6 +255,18 @@ class account_invoice(osv.osv):
             if i == 1:
                 product_te = self.xmlescape(record.product_id.name)
             i += 1
+        if xml_data.discount_money:
+            if not xml_data.type_discount:
+                raise openerp.recordexceptions.Warning('Error, Para Descuentos globales ingresar campo tipo de descuento')        
+            percentage = self.get_amount_for_discount_global(xml_data.type_discount, xml_data)
+            xml_factura +='<DscRcgGlobal>'
+            xml_factura +='<NroLinDR>1</NroLinDR>'
+            xml_factura +='<TpoMov>D</TpoMov>'
+            xml_factura +='<TpoValor>%</TpoValor>'
+            xml_factura +='<ValorDR>'+ str(int(percentage)) +'</ValorDR>'
+            if xml_data.type_discount == '1':
+                xml_factura +='<IndExeDR>1</IndExeDR>'
+            xml_factura +='</DscRcgGlobal>'
         xml_factura += '<Referencia>'            
         xml_factura +='<NroLinRef>1</NroLinRef>'
         xml_factura +='<TpoDocRef>' + str(xml_data.journal_id.code_sii) + '</TpoDocRef>'
@@ -262,6 +279,22 @@ class account_invoice(osv.osv):
         xml_factura += '</DTE>'
         xml_factura.encode('ISO-8859-1')
         return xml_factura
+
+    def get_amount_for_discount_global(self, type, invoice):
+        amount = 0
+        if invoice.type_discount == '1':
+            for line in invoice.invoice_line:
+                if not line.invoice_line_tax_id:
+                    amount += line.price_subtotal
+        elif invoice.type_discount == '2':
+            pass
+        elif invoice.type_discount == '3':
+            for line in invoice.invoice_line:
+                if line.invoice_line_tax_id:
+                    amount += line.price_subtotal
+        else:
+            amount = invoice.amount_base
+        return round((invoice.discount_money * 100)/amount)
     
     def xml_create(self, cr, uid, ids):
         invoice_obj = self.pool.get('account.invoice')
