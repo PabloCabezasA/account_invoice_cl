@@ -18,12 +18,14 @@
 				</xpath>
 				
 				<xpath expr="//notebook" position="inside">
-					<page string="SII Estados">
-					    <group>
+					<page string="SII">
+					    <group col="4" colspan="2">
 							<field name="trackid" />
 							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
 							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
-							<field name="to_setest" />																		
+							<field name="to_setest" />
+							<field name="codtax_norec" />		
+							<field name="codtax_imprecargo" />																							
 						</group>
 						<field name="state_emitidos" />	    
 					</page>
@@ -47,12 +49,15 @@
 						<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />                        
 				</xpath>
 				<xpath expr="//notebook" position="inside">
-					<page string="SII Estados">					    
-					    <group>
+					<page string="SII">					    
+					    <group col="4" colspan="2">
 							<field name="trackid" />	    					    					    					    
 							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
 							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
-							<field name="to_setest" />																		
+							<field name="to_setest" />	
+							<field name="codtax_norec" />
+							<field name="codtax_imprecargo" />
+																								
 						</group>
 						<field name="state_emitidos" />	    					    					    
 					</page>

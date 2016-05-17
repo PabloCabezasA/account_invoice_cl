@@ -10,4 +10,5 @@ import res_users
 import firmador
 import stock_picking
 import product_product
+import account_tax
 #import pos_receipt

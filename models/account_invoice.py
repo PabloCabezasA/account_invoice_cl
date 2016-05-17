@@ -73,6 +73,14 @@ class account_invoice(osv.osv):
                             ('2','Corrige Texto Documento de Referencia'),
                             ('3','Corrige montos')
                             ],'Codigo de referencia'),
+                'codtax_norec' : fields.selection([
+                            ('1','Compras destinadas a IVA a generar operaciones no gravados o exentas.'),                            
+                            ('2','Facturas de proveedores registradas fuera de plazo.'),
+                            ('3','Gastos rechazados'),
+                            ('4','Entregas gratuitas (premios, bonificaciones, etc. ) recibidas'),
+                            ('9','Otros')
+                            ],'Codigo impuesto no recaudable'),
+                'codtax_imprecargo' : fields.many2one('cod.recargo','codigo impuesto')
 
     }
 
@@ -84,6 +92,7 @@ class account_invoice(osv.osv):
         self.validar_parametros_certificado(cr, uid, xml_data.company_id)
         par_caf = self.validar_parametros_caf(cr, uid, xml_data.journal_id.code_sii)
         file_name = self.limpiar_campo_slash(xml_data.number)                        
+        file_name += '_'+datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         path = self.crear_archivo(xml_factura, file_name+'.xml')                        
         data = self._info_for_facturador(cr, uid, xml_data, par_caf, par_firmador, path, 'account.invoice')        
         try:
@@ -360,6 +369,7 @@ class account_invoice(osv.osv):
             self.validar_parametros_certificado(cr, uid, xml_data.company_id)
             par_caf = self.validar_parametros_caf(cr, uid, xml_data.journal_id.code_sii)
             file_name = self.limpiar_campo_slash(xml_data.number)                        
+            file_name += '_'+datetime.datetime.now().strftime('%Y%m%d%H%M%S')
             path = self.crear_archivo(xml_factura, file_name+'.xml')                        
             try:
                 data = self.firmado_envio(cr, uid, xml_data, path, par_caf, par_firmador)                                                                     
@@ -473,6 +483,8 @@ class account_invoice(osv.osv):
             position =0
             position = str(numero).find('/')
             numero = numero[position+1:]                    
+        if numero:
+            numero = str(int(numero))
         return numero
         
     def limpiar_campo_guion(self,numero):

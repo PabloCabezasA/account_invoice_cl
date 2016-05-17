@@ -86,7 +86,9 @@
             'views/account_invoice.xml',
             'views/stock_picking_view.xml',
             'views/wizard_buscar_correo.xml',            
-	],
+	        'views/librossii.xml',
+            'views/accounts_views.xml',
+    ],
     "update_xml" : [],
     "installable": True,
 	"active": False

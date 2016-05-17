@@ -20,6 +20,18 @@ import base64
 from datetime import datetime
 class firmador_firmador(osv.osv_memory):
     _name = 'firmador.firmador'
+
+    def firmar_libro_sii(self, cr, uid, ids, data, context=None):
+        cert = data['cert']
+        xml =  data['path']
+        passwd = data['passwd']
+        set_xml = data['name']
+        pathbase =  data['pathbase']
+        os.chdir(pathbase + '/facturador/')
+        os.system('pwd')
+        resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + xml+ ' ' +  cert + ' ' + passwd + ' > ' + set_xml)
+        return set_xml 
+
     
     def firmar_set_prueba_sii(self, cr, uid, ids, data, context=None):
         cert = data['cert']
