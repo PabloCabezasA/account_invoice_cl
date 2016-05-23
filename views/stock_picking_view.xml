@@ -13,12 +13,13 @@
  			
 			<xpath expr="//notebook" position="inside">
 				<page string="Facturacion Electronica">
-                <group>			    
-					<field name="trackid"/>
-					<field name="indicador_bienes"/>															
-					<field name="xml_file" filename="export_filename"/>		
-					<field name="id_documento" />  
-                	<field name="razonref" />												
+                <group col="4" colspan="2">			    
+					<field name="to_setest"/>
+					<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />  
+                	<field name="razonref" attrs="{'required':[('to_setest','=',True)]}" />
+					<field name="indicador_bienes" attrs="{'required':[('to_setest','=',True)]}" />																				
+					<field name="trackid" readonly="True"/>
+					<field name="xml_file" filename="export_filename" readonly="True"/>		
 				</group>
 				</page>				            
             </xpath>

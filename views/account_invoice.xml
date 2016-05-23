@@ -20,7 +20,7 @@
 				<xpath expr="//notebook" position="inside">
 					<page string="SII">
 					    <group col="4" colspan="2">
-							<field name="trackid" />
+							<field name="trackid" readonly="True"/>
 							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
 							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
 							<field name="to_setest" />
@@ -51,7 +51,7 @@
 				<xpath expr="//notebook" position="inside">
 					<page string="SII">					    
 					    <group col="4" colspan="2">
-							<field name="trackid" />	    					    					    					    
+							<field name="trackid" readonly="True"/>	    					    					    					    
 							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
 							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
 							<field name="to_setest" />	

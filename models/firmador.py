@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.osv import fields, osv
+import openerp.exceptions
 import logging
 import os
 import time 
@@ -32,6 +33,19 @@ class firmador_firmador(osv.osv_memory):
         resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + xml+ ' ' +  cert + ' ' + passwd + ' > ' + set_xml)
         return set_xml 
 
+    def enviar_libro_sii(self, cr, uid, ids, data, context=None):
+        cert = data['cert']
+        xml =  data['path']
+        passwd = data['passwd']
+        set_xml = data['name']
+        pathbase =  data['pathbase']
+        os.chdir(pathbase + '/facturador/')
+        os.system('pwd')
+        resp_envio = os.system(pathbase + '/facturador/facturista.sh --enviar ' + xml+ ' ' +  set_xml + ' ' +  '"Servidor=maullin.sii.cl;Puerto=443;SSL=1;ArchivoP12=' + cert + ';ContrasenaP12=' + passwd + '"')
+        if resp_envio != 0:
+            raise openerp.exceptions.Warning('Error al enviar xml.  Contactar administrador') 
+        print resp_envio 
+        return set_xml 
     
     def firmar_set_prueba_sii(self, cr, uid, ids, data, context=None):
         cert = data['cert']
@@ -67,8 +81,6 @@ class firmador_firmador(osv.osv_memory):
         os.chdir(pathbase + '/facturador/')
         os.system('pwd')
         resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + rutaxmldte+ ' ' +  rutacertpfx + ' ' +   contcertpxpfx + ' "CAF='+ rutacaf + '" >' + xmlfirmadosii)
-        print 'respuesta firma'
-        print resp_firma
         if resp_firma != 0:
             self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Error', 'code_sii': tipodte, 'folio': foliodte,'observacion': 'Fallo al firmar dte'}, context)
         self.guardar_dte_en_modelo(cr, uid, mids, xmlfirmadosii, modelo, name=name_file)
@@ -99,8 +111,6 @@ class firmador_firmador(osv.osv_memory):
         os.chdir(pathbase + '/facturador/')
         os.system('pwd')
         resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + rutaxmldte+ ' ' +  rutacertpfx + ' ' +   contcertpxpfx + ' "CAF=' + rutacaf + ';FechaResolucion=' + fecharesolucion +';NumeroResolucion=' + nroresolucion + ';RUTenvio=' + rutenvio + ';RUTrecepcion=60803000-K" > ' + xmlfirmadosii)
-        print 'respuesta firma'
-        print resp_firma
         if resp_firma != 0:
             self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Error', 'code_sii': tipodte, 'folio': foliodte,'observacion': 'Fallo al firmar dte'}, context)
         self.guardar_dte_en_modelo(cr, uid, mids, xmlfirmadosii, modelo)
@@ -110,8 +120,6 @@ class firmador_firmador(osv.osv_memory):
         os.chdir(pathbase+'/facturador/')
         os.system('pwd')
         resp_envio = os.system(pathbase + '/facturador/facturista.sh --enviar ' + xmlfirmadosii + ' ' + respenviosii   + ' ' +  '"Servidor=maullin.sii.cl;Puerto=443;SSL=1;ArchivoP12=' + rutacertpfx + ';ContrasenaP12=' + contcertpxpfx + '"')
-        print 'respuesta envio'
-        print resp_envio
         if resp_envio != 0:
             self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Error', 'code_sii': tipodte, 'folio': foliodte,'observacion': 'Fallo al enviar dte a SII'}, context)
         mirespuestasii = open(respenviosii,'r')

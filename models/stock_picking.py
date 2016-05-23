@@ -65,6 +65,7 @@ class stock_picking(osv.osv):
                 'trackid' : fields.char('trackid', size=200),
                 'id_documento' : fields.char('Documento Unico', size=200),
                 'razonref' : fields.char('Razon ref', size=200),
+                'to_setest' : fields.boolean('Set de Prueba'),
                 'indicador_bienes': fields.selection([
                             ('1', 'Operación constituye venta'),
                             ('2', 'Ventas por efectuar'), 
@@ -88,8 +89,8 @@ class stock_picking(osv.osv):
 
     def firmado_envio(self, cr, uid, picking, path, par_caf, par_firmador, modelo):
         data = self._info_for_facturador(cr, uid, picking, par_caf, par_firmador, path, modelo)
-        if invoice.to_setest:
-            self.pool.get('firmador.firmador').firmar_dte_prueba_sii(cr, uid, [invoice.id], data, context=None)        
+        if picking.to_setest:
+            self.pool.get('firmador.firmador').firmar_dte_prueba_sii(cr, uid, [picking.id], data, context=None)        
         elif par_firmador.type_send == 'firmar_enviar':
             self.pool.get('firmador.firmador').firmar_enviar_sii(cr, uid, [picking.id], data, context=None)
         elif par_firmador.type_send == 'firmar':
@@ -123,8 +124,6 @@ class stock_picking(osv.osv):
                     tax['amount'] = tx.amount
                     return tax
         return False    
-
-    
     
 stock_picking()
 
@@ -135,7 +134,8 @@ class stock_picking_out(osv.osv):
                 'export_filename': fields.char('nombre xml', size=200),
                 'trackid' : fields.char('trackid', size=200),
                 'id_documento' : fields.char('Documento Unico', size=200),
-                'razonref' : fields.char('razon Ref', size=200),                
+                'razonref' : fields.char('razon Ref', size=200),
+                'to_setest' : fields.boolean('Set de Prueba'),                
                 'indicador_bienes': fields.selection([
                             ('1', 'Operación constituye venta'),
                             ('2', 'Ventas por efectuar'), 
@@ -164,92 +164,126 @@ class stock_picking_out(osv.osv):
                     },
                 'nodestroy': False
                 }
-
-    def xml_create(self, cr, uid, ids, context = None):
+        
+    def crear_dte(self, cr, uid, ids , context=None):
         xml_data = self.browse(cr, uid, ids[-1], context)
         invoice_object = self.pool.get('account.invoice')
         picking_obj = self.pool.get('stock.picking')
-        if xml_data.stock_journal_id:
-            if not xml_data.id_documento:
-                raise openerp.exceptions.Warning('Ingresar Campo id Documento')                                    
-            if not xml_data.indicador_bienes:
-                raise openerp.exceptions.Warning('Indicador Tipo de traslado de bienes')
+        if not xml_data.id_documento:
+            raise openerp.exceptions.Warning('Ingresar Campo id Documento')                                    
+        if not xml_data.indicador_bienes:
+            raise openerp.exceptions.Warning('Indicador Tipo de traslado de bienes')
+        emisor_d = self.pool.get('res.partner').browse(cr, uid, xml_data.company_id.partner_id.id,)
+        emisor_d = invoice_object.limpiar_campos_emisor_xml(cr, uid, emisor_d)
+        invoice_object.limpiar_campos_receptor_xml(xml_data.partner_id)
+
+        xml_picking = '<DTE version="1.0">'
+        xml_picking += '<Documento ID="'+ xml_data.id_documento +'">' #Identificador único del DTE #Datos de Prueba            
+        xml_picking += '<Encabezado>' + '<IdDoc>'        
+        xml_picking += '<TipoDTE>' + xml_data.stock_journal_id.code_sii + '</TipoDTE>' #Dato de prueba
+        xml_picking += '<Folio>' + invoice_object.limpiar_campo_slash(xml_data.name) + '</Folio>' #Dato de prueba deveria estar en el rango de folios
+        xml_picking += '<FchEmis>' + xml_data.date[:10] + '</FchEmis>'
+        xml_picking += '<IndTraslado>'+ xml_data.indicador_bienes +'</IndTraslado>'
+        xml_picking += '<FchCancel>'+ xml_data.min_date[:10] +'</FchCancel>'
+        xml_picking += '</IdDoc>' + '<Emisor>'
+        
+        xml_picking += '<RUTEmisor>'+invoice_object.validar_rut(xml_data.company_id.vat)+'</RUTEmisor>' #self.validar_rut(emisor_d['vat'])
+        xml_picking += '<RznSoc>' + emisor_d.name + '</RznSoc>'
+        xml_picking += '<GiroEmis>' + emisor_d.giro + '</GiroEmis>'
+        xml_picking += '<Acteco>' + str(xml_data.company_id.acteco) + '</Acteco>' #Codigo de actividad emisor #Datos de prueba
+        xml_picking += '<DirOrigen>' + emisor_d.street + '</DirOrigen>'
+        xml_picking += '<CmnaOrigen>' + emisor_d.state_id.name + '</CmnaOrigen>'
+        xml_picking += '</Emisor>' + '<Receptor>'
+        xml_picking += '<RUTRecep>' + invoice_object.validar_rut(xml_data.partner_id.vat) + '</RUTRecep>'
+        xml_picking += '<RznSocRecep>' + xml_data.partner_id.name + '</RznSocRecep>'
+        xml_picking += '<GiroRecep>' + xml_data.partner_id.giro + '</GiroRecep>'
+        xml_picking += '<Contacto>' + xml_data.partner_id.email + '</Contacto>'
+        xml_picking += '<DirRecep>' + xml_data.partner_id.street + '</DirRecep>'
+        xml_picking += '<CmnaRecep>' + xml_data.partner_id.state_id.name + '</CmnaRecep>'
+        xml_picking += '<CiudadRecep>' + xml_data.partner_id.state_id.name + '</CiudadRecep>'
+        xml_picking += '</Receptor>' + '<Totales>'            
+        
+        MntNeto = self.get_amount_untaxed(xml_data)
+        xml_picking += '<MntNeto>'+ str(MntNeto) +'</MntNeto>'
+
+        tax  = picking_obj.validar_iva(cr, uid, xml_data)
+        xml_picking += self.validar_tax_in_xml(tax, MntNeto)
+        xml_picking, i, product_te = self.validate_detail(xml_data, xml_picking)
+        xml_picking += '<Referencia>'            
+        xml_picking +='<NroLinRef>1</NroLinRef>'
+        xml_picking +='<TpoDocRef>'+ str(xml_data.stock_journal_id.code_sii) +'</TpoDocRef>'
+        xml_picking +='<FolioRef>'+ invoice_object.limpiar_campo_slash(xml_data.name) + '</FolioRef>'
+        xml_picking +='<FchRef>'+ str(datetime.datetime.now().strftime("%Y-%m-%d")) +'</FchRef>'
+        if xml_data.razonref:
+            xml_picking +='<RazonRef>'+ xml_data.razonref +'</RazonRef>'
+        xml_picking += '</Referencia>'            
+        xml_picking += '</Documento>'
+        xml_picking += '</DTE>'
+        xml_picking.encode('ISO-8859-1')
+        return xml_picking        
+
+    def validate_detail(self, xml_data, xml_picking):
+        invoice_object = self.pool.get('account.invoice')
+        i = 1
+        for record in xml_data.move_lines: 
+            invoice_object.validar_campos_producto(record.product_id)
+            xml_picking += '<Detalle>'
+            xml_picking += '<NroLinDet>' + str(i) + '</NroLinDet>' + '<CdgItem>'
+            xml_picking += '<TpoCodigo>' + record.product_id.cpcs_id.name + '</TpoCodigo>'
+            xml_picking += '<VlrCodigo>' + invoice_object.limpiar_campo_guion(record.product_id.default_code) + '</VlrCodigo>' + '</CdgItem>'
+            xml_picking += '<NmbItem>' + record.product_id.name + '</NmbItem>'
+            xml_picking += '<DscItem>' + str(0) + '</DscItem>'                
+            xml_picking += '<QtyItem>' + str(int(record.product_qty)) + '</QtyItem>'
+
+            if record.product_id.uom_id:
+                if len(record.product_id.uom_id.name) > 4:
+                    unidad = record.product_id.uom_id.name[:4]                                              
+#                    raise openerp.exceptions.Warning('Unidad de medida demasiado larga max 4 digitos: %s-%s' % (record.product_id.name,record.product_id.uom_id.name))
+                else:
+                    unidad = record.product_id.uom_id.name                        
+            else:
+                raise openerp.exceptions.Warning('Favor Ingresar Unidad de Medida para producto : %s' % record.product_id.name)                    
+            xml_picking += '<UnmdRef>' + unidad + '</UnmdRef>'                
+            xml_picking += '<PrcItem>' + str( int( record.product_id.list_price ) ) + '</PrcItem>'
+            xml_picking += '<MontoItem>' + str( int(record.product_qty) *  int( record.product_id.list_price ) ) + '</MontoItem>'
+            xml_picking += '</Detalle>'            
+            if i == 1:
+                product_te = record.product_id.name
+            i += 1
+        return xml_picking, i , product_te
+
+    def get_amount_untaxed(self, xml_data):
+        MntNeto = 0 
+        for x in xml_data.move_lines:
+            MntNeto += int(x.product_qty) *  int( x.product_id.list_price )             
+        return MntNeto 
+    
+    def validar_tax_in_xml(self, tax, MntNeto):
+        xml_picking = ''
+        if tax:
+            xml_picking += '<TasaIVA>'+ str( int(tax['amount']*100) ) +'</TasaIVA>'
+            xml_picking += '<IVA>'+ str( int( MntNeto * tax['amount'] ) ) +'</IVA>'
+            xml_picking += '<MntTotal>' + str( int( MntNeto * ( 1 + tax['amount']) )) + '</MntTotal>'
+            xml_picking += '</Totales>' + '</Encabezado>'
+        else:
+            xml_picking += '<TasaIVA>'+ str(0) +'</TasaIVA>'
+            xml_picking += '<IVA>'+ str(0) +'</IVA>'
+            xml_picking += '<MntTotal>' + str( MntNeto ) + '</MntTotal>'
+            xml_picking += '</Totales>' + '</Encabezado>'
+        return xml_picking
+
+    def xml_create(self, cr, uid, ids, context = None):
+        picking_obj = self.pool.get('stock.picking')
+        invoice_object = self.pool.get('account.invoice')
+        xml_data = self.browse(cr, uid, ids)[0]
+        if xml_data.stock_journal_id.code_sii:
+            xml_picking = self.crear_dte(cr, uid, ids, context)
             par_firmador = invoice_object.validar_parametros_firmador(cr, uid)
             invoice_object.validar_parametros_certificado(cr, uid, xml_data.company_id)
             par_caf = invoice_object.validar_parametros_caf(cr, uid, xml_data.stock_journal_id.code_sii)
             file_name = invoice_object.limpiar_campo_slash(xml_data.name)
-            emisor_d = self.pool.get('res.partner').browse(cr, uid, xml_data.company_id.partner_id.id,)
-            emisor_d = invoice_object.limpiar_campos_emisor_xml(cr, uid, emisor_d)
-            invoice_object.limpiar_campos_receptor_xml(xml_data.partner_id)
-            xml_picking = '<DTE version="1.0">'
-            xml_picking += '<Documento ID="'+ xml_data.id_documento +'">' #Identificador único del DTE #Datos de Prueba            
-            xml_picking += '<Encabezado>' + '<IdDoc>'        
-            xml_picking += '<TipoDTE>' + xml_data.stock_journal_id.code_sii + '</TipoDTE>' #Dato de prueba
-            xml_picking += '<Folio>' + invoice_object.limpiar_campo_slash(xml_data.name) + '</Folio>' #Dato de prueba deveria estar en el rango de folios
-            xml_picking += '<FchEmis>' + xml_data.date[:10] + '</FchEmis>'
-            xml_picking += '<IndTraslado>'+ xml_data.indicador_bienes +'</IndTraslado>'
-            xml_picking += '<FchCancel>'+ xml_data.min_date[:10] +'</FchCancel>'
-            xml_picking += '</IdDoc>' + '<Emisor>'
-            xml_picking += '<RUTEmisor>'+invoice_object.validar_rut(xml_data.company_id.vat)+'</RUTEmisor>' #self.validar_rut(emisor_d['vat'])
-            xml_picking += '<RznSoc>' + emisor_d.name + '</RznSoc>'
-            xml_picking += '<GiroEmis>' + emisor_d.giro + '</GiroEmis>'
-            xml_picking += '<Acteco>' + str(xml_data.company_id.acteco) + '</Acteco>' #Codigo de actividad emisor #Datos de prueba
-            xml_picking += '<DirOrigen>' + emisor_d.street + '</DirOrigen>'
-            xml_picking += '<CmnaOrigen>' + emisor_d.state_id.name + '</CmnaOrigen>'
-            xml_picking += '</Emisor>' + '<Receptor>'
-            xml_picking += '<RUTRecep>' + invoice_object.validar_rut(xml_data.partner_id.vat) + '</RUTRecep>'
-            xml_picking += '<RznSocRecep>' + xml_data.partner_id.name + '</RznSocRecep>'
-            xml_picking += '<GiroRecep>' + xml_data.partner_id.giro + '</GiroRecep>'
-            xml_picking += '<Contacto>' + xml_data.partner_id.email + '</Contacto>'
-            xml_picking += '<DirRecep>' + xml_data.partner_id.street + '</DirRecep>'
-            xml_picking += '<CmnaRecep>' + xml_data.partner_id.state_id.name + '</CmnaRecep>'
-            xml_picking += '<CiudadRecep>' + xml_data.partner_id.state_id.name + '</CiudadRecep>'
-            xml_picking += '</Receptor>' + '<Totales>'            
-            MntNeto     = 0 
-            for x in xml_data.move_lines:
-                MntNeto += int(x.product_qty) *  int( x.product_id.list_price )             
-            xml_picking += '<MntNeto>'+ str(MntNeto) +'</MntNeto>'
-            tax  = picking_obj.validar_iva(cr, uid, xml_data)
-            xml_picking += '<TasaIVA>'+ str(int(tax['amount']*100)) +'</TasaIVA>'
-            xml_picking += '<IVA>'+ str(int( MntNeto * tax['amount'] )) +'</IVA>'
-            xml_picking += '<MntTotal>' + str(int( MntNeto * (1+tax['amount']) )) + '</MntTotal>'
-            xml_picking += '</Totales>' + '</Encabezado>'
-            i = 1
-            for record in xml_data.move_lines: 
-                invoice_object.validar_campos_producto(record.product_id)
-                xml_picking += '<Detalle>'
-                xml_picking += '<NroLinDet>' + str(i) + '</NroLinDet>' + '<CdgItem>'
-                xml_picking += '<TpoCodigo>' + record.product_id.cpcs_id.name + '</TpoCodigo>'
-                xml_picking += '<VlrCodigo>' + invoice_object.limpiar_campo_guion(record.product_id.default_code) + '</VlrCodigo>' + '</CdgItem>'
-                xml_picking += '<NmbItem>' + record.product_id.name + '</NmbItem>'
-                xml_picking += '<DscItem>' + str(0) + '</DscItem>'                
-                xml_picking += '<QtyItem>' + str(int(record.product_qty)) + '</QtyItem>'
-                if record.product_id.uom_id:
-                    if len(record.product_id.uom_id.name) > 4:
-                        raise openerp.exceptions.Warning('Unidad de medida demasiado larga max 4 digitos: %s-%s' % (record.product_id.name,record.product_id.uom_id.name))
-                    else:
-                        unidad = record.product_id.uom_id.name                        
-                else:
-                    raise openerp.exceptions.Warning('Favor Ingresar Unidad de Medida para producto : %s' % record.product_id.name)                    
-                xml_picking += '<UnmdRef>' + unidad + '</UnmdRef>'                
-                xml_picking += '<PrcItem>' + str( int( record.product_id.list_price ) ) + '</PrcItem>'
-                xml_picking += '<MontoItem>' + str( int(record.product_qty) *  int( record.product_id.list_price ) ) + '</MontoItem>'
-                xml_picking += '</Detalle>'            
-                if i == 1:
-                    product_te = record.product_id.name
-                i += 1
-            xml_picking += '<Referencia>'            
-            xml_picking +='<NroLinRef>1</NroLinRef>'
-            xml_picking +='<TpoDocRef>'+ str(xml_data.stock_journal_id.code_sii) +'</TpoDocRef>'
-            xml_picking +='<FolioRef>'+ invoice_object.limpiar_campo_slash(xml_data.name) + '</FolioRef>'
-            xml_picking +='<FchRef>'+ str(datetime.datetime.now().strftime("%Y-%m-%d")) +'</FchRef>'
-            if xml_data.razonref:
-                xml_picking +='<RazonRef>'+ xml_data.razonref +'</RazonRef>'
-            xml_picking += '</Referencia>'            
-            xml_picking += '</Documento>'
-            xml_picking += '</DTE>'
-            xml_picking.encode('ISO-8859-1')
-            path = picking_obj.crear_archivo(xml_picking, file_name+'.xml')       
+            file_name += '_'+datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+            path = invoice_object.crear_archivo(xml_picking, file_name+'.xml')                        
             try:                 
                 data = picking_obj.firmado_envio(cr, uid, xml_data, path, par_caf, par_firmador, 'stock.picking.out')                                                                     
             except:
