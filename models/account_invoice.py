@@ -484,7 +484,8 @@ class account_invoice(osv.osv):
             position = str(numero).find('/')
             numero = numero[position+1:]                    
         if numero:
-            numero = str(int(numero))
+            numero = self.limpiar_campo_guion(numero)
+            numero = str(int(numero))        
         return numero
         
     def limpiar_campo_guion(self,numero):

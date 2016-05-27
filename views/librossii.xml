@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>        
+
+		<record id="libroelectronicosii_form" model="ir.ui.view">
+            <field name="name">libros.electronicos.sii.form</field>
+            <field name="model">libros.electronicos.sii</field>            
+            <field name="arch" type="xml">
+                <form string="SII" version="7.0">
+				<group col="4" colspan="2">
+					<field name="company_id" required="True"/>
+					<field name="period_id" required="True"/>					
+					<field name="type_book" required="True"/>
+					<field name="type_send" required="True"/>
+					<field name="type" required="True"/>
+					<field name="to_test"/>					
+				</group>
+				<group col="2" colspan="2">
+					<field name="xml_file" filename="xml_name" readonly="True" />
+					<button name="create_file" string="Crear" type="object" class="oe_highlight"/>
+					<button name="send_file" string="Enviar" type="object" class="oe_highlight"/>
+				</group>
+                </form>
+            </field>
+        </record>        
+		
+		<record id="action_libroelectronicosii" model="ir.actions.act_window">
+            <field name="name">Libros Electronicos S.I.I</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">libros.electronicos.sii</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>    
+                        
+		<menuitem name="Libros Electronicos S.I.I" parent="sii_libro_electronico"
+			id="menu_libroelectronicosii_lvl2" action="action_libroelectronicosii" />
+				
+	</data>
+</openerp>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+        	<record model="ir.ui.view" id="account_tax_form_id">
+			<field name="name">account.tax.form</field>
+			<field name="model">account.tax</field>
+			<field name='inherit_id' ref='account.view_tax_form' />
+			<field name="arch" type="xml">
+				
+				<xpath expr="//notebook" position="inside">
+					<page string="S.I.I">
+					    <group col="4" colspan="2">
+							<field name="type_sii" required="True"/>
+							<field name="type_tax_sii" required="True"/>							
+						</group>
+					</page>
+				</xpath>
+			</field>
+		</record>    
+			
+    </data>
+</openerp>
