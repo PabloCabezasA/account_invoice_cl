@@ -51,6 +51,24 @@ class siiSetDte(osv.osv_memory):
              'company_id' : fields.many2one('res.company', 'Compañia'),
              'partner_id' : fields.many2one('res.partner', 'Proveedor') 
     }    
+
+    def enviar_archivo_set(self, cr, uid, ids, context= None):
+        this = self.browse(cr, uid ,ids[-1], context)
+        if this.xml_file:
+            par_firmador = self.pool.get('account.invoice').validar_parametros_firmador(cr, uid)
+            path = '/tmp/sendSetPrueba_' + this.xml_name
+            vfile = open(path,'a+b')
+            vfile.write( base64.decodestring(this.xml_file))
+            vfile.close()
+            data ={ 'path' : path,
+                    'cert': par_firmador.pathcertificado + this.company_id.export_filename, 
+                    'passwd' :this.company_id.p12pass if this.company_id.p12pass else '',
+                    'name' : par_firmador.pathbase + '/out/resp_sii/resp_SetPrueba' + this.xml_name, 
+                    'pathbase' : par_firmador.pathbase
+                    }
+            self.pool.get('firmador.firmador').enviar_libro_sii(cr, uid, ids, data, None)
+        else:
+            raise openerp.exceptions.Warning('Error al enviar xml. Favor primero generar el Libro') 
     
     def crear_archivo_set(self, cr, uid, ids, context= None):
         this = self.browse(cr, uid, ids[-1])

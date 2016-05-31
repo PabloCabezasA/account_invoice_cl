@@ -61,6 +61,7 @@
 						</group>
 						<group colspan="4">
 							<button name='crear_archivo_set' type='object' string='Crear' class="oe_highlight" />
+							<button name='enviar_archivo_set' type='object' string='Enviar' class="oe_highlight" />
 						</group>
 					</sheet>
 				</form>
