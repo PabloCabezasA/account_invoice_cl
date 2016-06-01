@@ -72,7 +72,7 @@ class LibrosElectronicosSii(osv.osv_memory):
         id_doc = self.format_period(this.period_id)
         if invoices and this.type_send == 'total':
             valid = True
-            detail = self.create_detail(cr, uid, ids, invoices)
+            detail = self.create_detail(cr, uid, ids, invoices, this.type_book)
         try:
             path, file = self.get_file(front_page, resume, detail, valid, type, name_file, id_doc)            
         except:
@@ -195,7 +195,7 @@ class LibrosElectronicosSii(osv.osv_memory):
     def format_amount_integer(self, amount):        
         return str(int(round(amount)))
 
-    def create_detail(self, cr, uid, ids, invoices):
+    def create_detail(self, cr, uid, ids, invoices, type):
         inv_obj = self.pool.get('account.invoice')
         detail = ''
         for key in invoices.keys():
@@ -203,7 +203,11 @@ class LibrosElectronicosSii(osv.osv_memory):
                 totales, tax_obj = self.calc_totals(cr, uid, [inv])
                 detail += '<Detalle>'
                 detail += '<TpoDoc>'+ inv.journal_id.code_sii +'</TpoDoc>'
-                detail += '<NroDoc>'+ inv_obj.limpiar_campo_slash(inv.number) +'</NroDoc>'
+                if type == 'compra':
+                    detail += '<NroDoc>'+ inv_obj.limpiar_campo_slash(inv.supplier_invoice_number) +'</NroDoc>'
+                else:                    
+                    detail += '<NroDoc>'+ inv_obj.limpiar_campo_slash(inv.number) +'</NroDoc>'
+
                 if totales['anulados'] >0:
                     detail +='<Anulado>A</Anulado>'
                     detail +='</Detalle>'
