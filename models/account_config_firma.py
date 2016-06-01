@@ -26,6 +26,7 @@ from datetime import datetime
 import base64
 import unicodedata
 import os
+import openerp.exceptions
 
 class account_config_firma(osv.osv):
     _name='account.config.firma'
@@ -138,7 +139,7 @@ class siiSetDte(osv.osv_memory):
     def crear_xml_setprueba(self, cr, uid, ids, dataxml_dict):
         this = self.browse(cr, uid, ids[-1])
         xml = '<?xml version="1.0" encoding="ISO-8859-1"?>'
-        xml += '<EnvioDTE version="1.0">'
+        xml += '<EnvioDTE xmlns="http://www.sii.cl/SiiDte" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://www.sii.cl/SiiDte EnvioDTE_v10.xsd">'
         xml += '<SetDTE ID="SetDoc">'
         xml += '<Caratula version="1.0">'
         xml += '<RutEmisor>'+ self.validar_rut(this.company_id.vat)+'</RutEmisor>'
