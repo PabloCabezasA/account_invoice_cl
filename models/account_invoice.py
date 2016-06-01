@@ -233,10 +233,8 @@ class account_invoice(osv.osv):
         xml_factura += '<MntNeto>' + str(int(xml_data.amount_untaxed)) + '</MntNeto>'                                
         xml_factura += '<MntExe>' + str(int(self.validar_total_exento(cr,uid,xml_data))) + '</MntExe>'            
         xml_factura = self.validate_iva(xml_data, impuesto_obj, xml_factura)
-
         xml_factura += '<MntTotal>' + str(int(xml_data.amount_total)) + '</MntTotal>'
         xml_factura += '</Totales>' + '</Encabezado>'    
-
         xml_factura, i, product_te = self.validate_detail(xml_data, xml_factura)
         
         if xml_data.discount_money:
@@ -277,7 +275,6 @@ class account_invoice(osv.osv):
         xml_factura += '<IVA>' + str(int(xml_data.amount_tax)) + '</IVA>'
         return xml_factura
 
-
     def validate_references(self, xml_data, nrolinref,xml_factura ):
         if str(xml_data.journal_id.code_sii) in ('56','61'):
             if not xml_data.cod_ref:
@@ -291,8 +288,7 @@ class account_invoice(osv.osv):
             xml_factura +='</Referencia>'
             nrolinref +=1
         return xml_factura
-    
-    
+        
     def validate_detail(self, xml_data, xml_factura):
         i = 1
         for record in xml_data.invoice_line:
@@ -350,7 +346,6 @@ class account_invoice(osv.osv):
             xml_factura += '<FmaPago>' + forma_pago + '</FmaPago>'
             xml_factura += '<FchVenc>' + xml_data.date_due + '</FchVenc>'
         
-
     def get_amount_for_discount_global(self, type, invoice):
         amount = 0
         if invoice.type_discount == '1':
@@ -370,6 +365,8 @@ class account_invoice(osv.osv):
     def xml_create(self, cr, uid, ids):
         invoice_obj = self.pool.get('account.invoice')
         xml_data = invoice_obj.browse(cr, uid, ids)[0]        
+        if xml_data.type in ('in_invoice', 'in_refund'):
+            return True
         if xml_data.journal_id.code_sii:            
             xml_factura = self.crear_dte(cr, uid, ids)
             par_firmador = self.validar_parametros_firmador(cr, uid)
@@ -402,10 +399,8 @@ class account_invoice(osv.osv):
             return ''
         return str(unicodedata.normalize('NFKD', valor).encode('ascii','ignore'))
 
-
     def xmlescape(self, data):
         return escape(data)
-
 
     def firmado_envio(self, cr, uid, invoice, path, par_caf, par_firmador):
         data = self._info_for_facturador(cr, uid, invoice, par_caf, par_firmador, path, 'account.invoice')        

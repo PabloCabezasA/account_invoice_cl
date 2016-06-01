@@ -74,7 +74,7 @@ class siiSetDte(osv.osv_memory):
         this = self.browse(cr, uid, ids[-1])
         cr.execute("""
             select id from account_invoice where to_setest = True and state not in('draft', 'cancel')
-            and company_id = %d and partner_id = %d 
+            and company_id = %d and partner_id = %d and type in ('out_invoice','out_refund') 
         """ %  (this.company_id.id, this.partner_id.id) )
         all_ids = map(lambda x:x[0], cr.fetchall())
         if not all_ids:
@@ -172,8 +172,7 @@ class siiSetDte(osv.osv_memory):
         if valor == None:
             return ''
         return str(unicodedata.normalize('NFKD', valor).encode('ascii','ignore'))
-        
-    
+            
     def buscar_archivo_xml(self, name_file, pathbase):    
         pathxmlfirmado = pathbase + '/out/dte_setprueba/'
         xmlfirmadosii = pathbase + '/out/dte_setprueba/'+ name_file
@@ -201,7 +200,6 @@ class siiSetDte(osv.osv_memory):
                 elif cont == len(rut):
                     vat +=r
         return str(str(vat[:len(vat)-1])+'-'+vat[len(vat)-1]).strip()
-    
     
 siiSetDte()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#
