@@ -232,11 +232,8 @@ class account_invoice(osv.osv):
         xml_factura += '</Receptor>' + '<Totales>'            
         xml_factura += '<MntNeto>' + str(int(xml_data.amount_untaxed)) + '</MntNeto>'                                
         xml_factura += '<MntExe>' + str(int(self.validar_total_exento(cr,uid,xml_data))) + '</MntExe>'            
-        if impuesto_obj:
-            xml_factura += '<TasaIVA>' + "{0:.2f}".format(impuesto_obj.amount * 100) + '</TasaIVA>'
-        else:
-            xml_factura += '<TasaIVA>'+'0'+'</TasaIVA>'
-        xml_factura += '<IVA>' + str(int(xml_data.amount_tax)) + '</IVA>'
+        xml_factura = self.validate_iva(xml_data, impuesto_obj, xml_factura)
+
         xml_factura += '<MntTotal>' + str(int(xml_data.amount_total)) + '</MntTotal>'
         xml_factura += '</Totales>' + '</Encabezado>'    
 
@@ -268,6 +265,16 @@ class account_invoice(osv.osv):
         xml_factura += '</Documento>'
         xml_factura += '</DTE>'
         xml_factura.encode('ISO-8859-1')
+        return xml_factura
+
+    def validate_iva(self, xml_data, impuesto_obj,xml_factura ):
+        if str(xml_data.journal_id.code_sii) in ('34',):
+            return xml_factura
+        if impuesto_obj:
+            xml_factura += '<TasaIVA>' + "{0:.2f}".format(impuesto_obj.amount * 100) + '</TasaIVA>'
+        else:
+            xml_factura += '<TasaIVA>'+'0'+'</TasaIVA>'
+        xml_factura += '<IVA>' + str(int(xml_data.amount_tax)) + '</IVA>'
         return xml_factura
 
 

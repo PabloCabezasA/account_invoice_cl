@@ -335,4 +335,5 @@ class LibrosElectronicosSii(osv.osv_memory):
         else:
             raise openerp.exceptions.Warning('Error al enviar xml. Favor primero generar el Libro') 
 LibrosElectronicosSii()    
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
