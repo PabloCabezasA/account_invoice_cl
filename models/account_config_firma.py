@@ -19,39 +19,36 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, fields
+from openerp import  models, fields
+from openerp.osv import osv
 import xml.etree.ElementTree as ET
 from xml.dom.minidom import parse, parseString
 from datetime import datetime
 import base64
 import unicodedata
 import os
-import openerp.exceptions
 
-class account_config_firma(osv.osv):
+class account_config_firma(models.Model):
     _name='account.config.firma'
-    _columns={
-             'pathbase': fields.char("Path base", help='Ruta a la libreria ej: /home/openerp/lfubu14_64', size=250),
-             'pathfolio': fields.char("Path folios", help='Ruta a los folios ej: /home/openerp/caf/', size=250),
-             'pathcertificado': fields.char("Path Certificados", help='Ruta a los certificados ej: /home/openerp/certificados/', size=250),             
-             'type_send': fields.selection([
-                        ('firmar','Firmar'),
-                        ('firmar_enviar','Firmado e envio'), 
-                        ], 'Tipo de Envio'),              
-    }    
+    pathbase = fields.Char("Path base", help='Ruta a la libreria ej: /home/openerp/lfubu14_64', size=250)
+    pathfolio = fields.Char("Path folios", help='Ruta a los folios ej: /home/openerp/caf/', size=250)
+    pathcertificado = fields.Char("Path Certificados", help='Ruta a los certificados ej: /home/openerp/certificados/', size=250)             
+    type_send = fields.Selection([
+               ('firmar','Firmar'),
+               ('firmar_enviar','Firmado e envio'), 
+               ], 'Tipo de Envio')              
+
 account_config_firma()
 
 
 class siiSetDte(osv.osv_memory):
     _name='sii.set.dte'
-    _columns={
-             'name': fields.char("Nombre", size=250),
-             'qty': fields.integer("Documentos", size=250),
-             'xml_file': fields.binary('Set de Prueba'), 
-             'xml_name': fields.char('Nombre xml', size=200),
-             'company_id' : fields.many2one('res.company', 'Compañia'),
-             'partner_id' : fields.many2one('res.partner', 'Proveedor') 
-    }    
+    name = fields.Char("Nombre", size=250)
+    qty = fields.Integer("Documentos", size=250)
+    xml_file = fields.Binary('Set de Prueba')
+    xml_name = fields.Char('Nombre xml', size=200)
+    company_id = fields.Many2one('res.company', 'Compañia')
+    partner_id = fields.Many2one('res.partner', 'Proveedor') 
 
     def enviar_archivo_set(self, cr, uid, ids, context= None):
         this = self.browse(cr, uid ,ids[-1], context)
@@ -201,6 +198,5 @@ class siiSetDte(osv.osv_memory):
                 elif cont == len(rut):
                     vat +=r
         return str(str(vat[:len(vat)-1])+'-'+vat[len(vat)-1]).strip()
-    
 siiSetDte()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#

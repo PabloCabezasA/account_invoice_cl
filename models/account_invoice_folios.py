@@ -18,39 +18,38 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.osv import fields, osv
+from openerp import fields, models, api
+from openerp.exceptions import except_orm, Warning, RedirectWarning
 from lxml import objectify
 import base64
 
-class account_invoice_folios(osv.osv):
+class account_invoice_folios(models.Model):
 	_name = 'account.invoice.folios'
-	_columns = {
-		'code_sii': fields.selection([
-                            ('33','Facturación Eletrónica'),
-                            ('34','Factura No Afecta o Exenta Electrónica'), 
-                            ('43','Liquidación-Factura Electrónica'), 
-                            ('46','Factura de Compra Electrónica'), 
-                            ('52','Guía de Despacho Electrónica'),
-                            ('56','Nota de Débito Electrónica'), 
-                            ('61','Nota de Crédito Electrónica'),
-                            ('110','Factura de Exportación'),
-                            ('111','Nota de Débito de Exportación'),
-                            ('112','Nota de Crédito de Exportación')
-                            ], 'Codigo SII Chile'),
-		'folio_start': fields.integer('Inicio Folio'),
-		'folio_end': fields.integer('Termino Folio'),
-		'date_approve': fields.date('Fecha Aprobación'),
-		'state_folio': fields.selection([
-										('1','Emitidos'),
-			                            ('2','Actual'), 
-			                            ('3','Disponibles'),
-			                            ], 'Estados', ),
-		'xml_folio': fields.binary('Ingrese Folios', filters='*.xml'),
-		'export_filename': fields.char('Nombre del Folio', size=200), #Nombre Factura Firmada para rescate
-		'company_id': fields.many2one('res.company', 'Compañia'),
+	code_sii = fields.Selection([
+                        ('33','Facturación Eletrónica'),
+                        ('34','Factura No Afecta o Exenta Electrónica'), 
+                        ('43','Liquidación-Factura Electrónica'), 
+                        ('46','Factura de Compra Electrónica'), 
+                        ('52','Guía de Despacho Electrónica'),
+                        ('56','Nota de Débito Electrónica'), 
+                        ('61','Nota de Crédito Electrónica'),
+                        ('110','Factura de Exportación'),
+                        ('111','Nota de Débito de Exportación'),
+                        ('112','Nota de Crédito de Exportación')
+                        ], 'Codigo SII Chile')
+	folio_start = fields.Integer('Inicio Folio')
+	folio_end = fields.Integer('Termino Folio')
+	date_approve = fields.Date('Fecha Aprobación')
+	state_folio = fields.Selection([
+									('1','Emitidos'),
+		                            ('2','Actual'), 
+		                            ('3','Disponibles'),
+		                            ], 'Estados', )
+	xml_folio = fields.Binary('Ingrese Folios', filters='*.xml')
+	export_filename = fields.Char('Nombre del Folio', size=200)
+	company_id = fields.Many2one('res.company', 'Compañia')
 
-    }
-	
+	@api.v7
 	def create(self, cr, uid, data, context=None):
 		xml = objectify.fromstring(base64.b64decode(data['xml_folio']))
 		values = ({
@@ -68,19 +67,20 @@ class account_invoice_folios(osv.osv):
 		self.crear_archivo_en_ruta(cr, uid, data, context)
 		return reg
 	
+	@api.v7
 	def crear_archivo_en_ruta(self, cr, uid, data, context= None):
 		par_firma = self.validar_parametros_firmador(cr, uid)
 		fh = open(par_firma.pathfolio + data['export_filename'], "wb")
 		fh.write(base64.b64decode(data['xml_folio']))
 		fh.close()
 		
-
+	@api.v7
 	def validar_parametros_firmador(self, cr, uid):
 		context = {}
 		acf_obj = self.pool.get('account.config.firma')
 		for acf in acf_obj.browse(cr, uid, acf_obj.search(cr, uid, [], context)):
 			return acf
-		raise openerp.exceptions.Warning('Error al crear la factura. Favor crear parametros del firmador')
+		raise Warning('Error al crear la factura. Favor crear parametros del firmador') 
 
 		
 account_invoice_folios()

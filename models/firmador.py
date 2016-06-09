@@ -1,27 +1,16 @@
 # -*- coding: utf-8 -*-
-from openerp.osv import fields, osv
-import openerp.exceptions
-import logging
+from openerp import fields, api
+from openerp.osv import osv
+from openerp.exceptions import except_orm, Warning, RedirectWarning
 import os
-import time 
-import random
-import pickle
-import re
-import subprocess
-import traceback
-import math
 from xml.dom.minidom import parse,parseString
-import xmlrpclib
-from threading import Thread, Lock
-from Queue import Queue, Empty
-import json
-from simplejson import JSONEncoder
-#import cherrypy
 import base64
 from datetime import datetime
+
 class firmador_firmador(osv.osv_memory):
     _name = 'firmador.firmador'
 
+    @api.model
     def firmar_libro_sii(self, cr, uid, ids, data, context=None):
         cert = data['cert']
         xml =  data['path']
@@ -33,6 +22,7 @@ class firmador_firmador(osv.osv_memory):
         resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + xml+ ' ' +  cert + ' ' + passwd + ' > ' + set_xml)
         return set_xml 
 
+    @api.model
     def enviar_libro_sii(self, cr, uid, ids, data, context=None):
         cert = data['cert']
         xml =  data['path']
@@ -47,6 +37,7 @@ class firmador_firmador(osv.osv_memory):
         print resp_envio 
         return set_xml 
     
+    @api.model
     def firmar_set_prueba_sii(self, cr, uid, ids, data, context=None):
         cert = data['cert']
         xml =  data['path']
@@ -58,6 +49,7 @@ class firmador_firmador(osv.osv_memory):
         resp_firma = os.system(pathbase + '/facturador/facturista.sh --firmar_p12 ' + xml+ ' ' +  cert + ' ' + passwd + ' > ' + set_xml)
         return set_xml 
     
+    @api.model
     def firmar_dte_prueba_sii(self, cr, uid, ids, data, context=None):
         rutaxmldte =data['rutaxmldte']
         rutacertpfx = data['rutacertpfx']
@@ -89,6 +81,7 @@ class firmador_firmador(osv.osv_memory):
         os.chdir(pathbase+'/facturador/')
         return xmlfirmadosii
     
+    @api.model
     def firmar_enviar_sii(self, cr, uid, ids, data, context=None):
         rutaxmldte =data['rutaxmldte']
         rutacertpfx = data['rutacertpfx']
@@ -134,7 +127,8 @@ class firmador_firmador(osv.osv_memory):
         self.pool.get(modelo).write(cr, uid, mids,{'trackid' : trackid})
         return xmlfirmadosii
 
-    def fimar_cliente(self, cr, uid, ids, data, context=None):
+    @api.model
+    def fimar_cliente(self, ids, data, context=None):
         rutaxmldte =data['rutaxmldte']
         rutacertpfx = data['rutacertpfx']
         contcertpxpfx = data['contcertpxpfx']
@@ -161,9 +155,9 @@ class firmador_firmador(osv.osv_memory):
         print 'respuesta firma'
         print resp_firma
         if resp_firma != 0:
-            self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Error', 'code_sii': tipodte, 'folio': foliodte,'observacion': 'Fallo al firmar dte'}, context)
-        self.guardar_dte_en_modelo(cr, uid, mids, xmlfirmadosii, modelo)
-        self.guardar_vitacora(cr, uid, mids, modelo, {'state': 'Firma DTE SII OK', 'code_sii': str(tipodte), 'folio': str(foliodte),'observacion': 'Proceso de firma DTE'}, context)
+            self.guardar_vitacora(mids, modelo, {'state': 'Error', 'code_sii': tipodte, 'folio': foliodte,'observacion': 'Fallo al firmar dte'}, context)
+        self.guardar_dte_en_modelo(mids, xmlfirmadosii, modelo)
+        self.guardar_vitacora(mids, modelo, {'state': 'Firma DTE SII OK', 'code_sii': str(tipodte), 'folio': str(foliodte),'observacion': 'Proceso de firma DTE'}, context)
         midom=parse(xmlfirmadosii)
         elements = midom.getElementsByTagName("TED")
         respuesta = {}
@@ -173,28 +167,29 @@ class firmador_firmador(osv.osv_memory):
         os.remove(rutaxmldte)        
         return respuesta
  
-    
-    def guardar_dte_en_modelo(self, cr, uid, ids, archivo, modelo, name = None):
+    @api.model    
+    def guardar_dte_en_modelo(self, ids, archivo, modelo, name = None):
         print 'guardando'
         b64data = ''
         if name is None:
-            name = 'factura.xml'
+            name = 'factura_%s.xml' % str(datetime.now().strftime('%Y%m%d%H%M%S'))
         try:
             with open(archivo, 'r') as myfile:
                 b64data = base64.b64encode(myfile.read())
                 myfile.close()
             print b64data
-            self.pool.get(modelo).write(cr, uid, ids, {'xml_file': b64data, 'export_filename' : name })
+            self.env[modelo].browse(ids).write({'xml_file': b64data, 'export_filename' : name })
         except:
             print 'fallo al guardar archivo'
 
-
-    def guardar_vitacora(self, cr, uid, ids, modelo, data, context=None):
+    @api.model
+    def guardar_vitacora(self, ids, modelo, data, context=None):
         if modelo == 'account.invoice':
             data['invoice'] = ids
         elif modelo == 'stock.picking.out':
             data['picking_out_id'] = ids
         elif modelo == 'stock.picking.in':
             data['picking_out_in'] = ids
-        self.pool.get('account.invoice.emitidos').create(cr, uid, data)
+        self.env['account.invoice.emitidos'].create(data)
         return True
+    

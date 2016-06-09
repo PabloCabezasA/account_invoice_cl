@@ -19,16 +19,15 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, fields
+from openerp import models, fields
 
-class config_dte_invoice(osv.osv):
+class config_dte_invoice(models.Model):
     _name="config.dte.invoice"
-    _columns={
-              "account_client_default": fields.many2one('account.account', 'Cuenta cliente', required=True, readonly=False, help="Cuenta que se usa para la generacion de las lineas de la factura."),
-              "account_proveedor_default": fields.many2one('account.account', 'Cuenta proveedor', required=True, readonly=False, help="Cuenta que se usa para la generacion de las lineas de la factura."),
-              "iva_credito": fields.many2one('account.tax', 'IVA CF', required=True, readonly=False),
-              "iva_debito": fields.many2one('account.tax', 'IVA DF', required=True, readonly=False),
-              "state": fields.boolean('Estado', help="muesta si es activo o inactivo")
-             }    
+    account_client_default = fields.Many2one('account.account', 'Cuenta cliente', required=True, readonly=False, help="Cuenta que se usa para la generacion de las lineas de la factura.")
+    account_proveedor_default = fields.Many2one('account.account', 'Cuenta proveedor', required=True, readonly=False, help="Cuenta que se usa para la generacion de las lineas de la factura.")
+    iva_credito = fields.Many2one('account.tax', 'IVA CF', required=True, readonly=False)
+    iva_debito = fields.Many2one('account.tax', 'IVA DF', required=True, readonly=False)
+    state = fields.Boolean('Estado', help="muesta si es activo o inactivo")
+
 config_dte_invoice()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#

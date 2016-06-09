@@ -68,29 +68,36 @@
             aptitude install xmlsec1
         
                     """,
-    "depends" : ['base','account','base_vat','product','stock','l10n_cl_partner','l10n_cl_toponyms'],    
+    "depends" : ['base','base_setup', 'account', 'base_vat', 'product', 'stock', 'sale_stock', 'l10n_cl_toponyms'],    
 	"data": [
-            'workflow/workflow.xml',            
             'views/menu_facturacion_dte.xml',
-            'views/default_account_dte.xml',            
+            'views/account_invoice_emitidos.xml',
+            'views/account_invoice.xml',
+            'views/account_journal_code.xml',
+            'views/view_company.xml',
+            'views/res_users_view.xml',
+            'views/cpcs_view.xml',
+            'views/product_product_view.xml',
+            'views/accounts_views.xml',           
+
+
             'views/account_invoice_folios.xml',                
             'views/account_config_firma.xml',
-            'views/account_journal_code.xml',
-            'views/account_invoice_emitidos.xml',
-            'views/account_invoice_dte.xml',
-            'views/view_company.xml',
-            'views/product_product_view.xml',
-            'views/cpcs_view.xml',
-            'views/cron_monitor_documentos.xml',
-            'views/res_users_view.xml',
-            'views/account_invoice.xml',
-            'views/stock_picking_view.xml',
-            'views/wizard_buscar_correo.xml',            
-	        'views/librossii.xml',
-            'views/accounts_views.xml',
+            'views/default_account_dte.xml',            
+            
+
+            'workflow/workflow.xml',            
+#            'views/account_invoice_dte.xml',
+#            'views/stock_picking_view.xml',
+#            'views/wizard_buscar_correo.xml',            
+#	        'views/librossii.xml',
+#            'views/cron_monitor_documentos.xml',            
+
     ],
+
     "update_xml" : [],
     "installable": True,
 	"active": False
+
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#

@@ -10,15 +10,16 @@
 					<button name="print_for_idiots" class="oe_highlight" context="{'journal_id':journal_id}" string="Imprimir" type="object" />
 				</xpath>
 							
-				<xpath expr="//field[@name='period_id']" position="after">					                                       
-	                <field name="xml_file" filename="export_filename"/>
-	                <field name="type_discount"/>
-	                <field name="invoicerel_id" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />	                	                                    
-					<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />
-				</xpath>
 				
 				<xpath expr="//notebook" position="inside">
 					<page string="SII">
+					    <group col="4" colspan="2">
+			                <field name="xml_file" filename="export_filename" readonly="True"/>
+			                <field name="type_discount"/>
+			                <field name="invoicerel_id" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />	                	                                    
+							<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />
+						</group>
+
 					    <group col="4" colspan="2">
 							<field name="trackid" readonly="True"/>
 							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />
@@ -42,14 +43,14 @@
 					<button name="print_for_idiots" class="oe_highlight" context="{'journal_id':journal_id}" string="Imprimir" type="object" />
 				</xpath>
 			
-				<xpath expr="//field[@name='move_id']" position="after">					                                       
-                        <field name="xml_file" filename="export_filename"/>
-                        <field name="type_discount"/>   
-                        <field name="invoicerel_id" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />
-						<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />                        
-				</xpath>
 				<xpath expr="//notebook" position="inside">
 					<page string="SII">					    
+					    <group col="4" colspan="2">	
+	                        <field name="xml_file" filename="export_filename" readonly="True"/>
+	                        <field name="type_discount"/>   
+	                        <field name="invoicerel_id" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />
+							<field name="cod_ref" attrs="{'invisible':[('type','not in',['in_refund','out_refund'])]}" />                        
+						</group>
 					    <group col="4" colspan="2">
 							<field name="trackid" readonly="True"/>	    					    					    					    
 							<field name="id_documento" attrs="{'required':[('to_setest','=',True)]}" />

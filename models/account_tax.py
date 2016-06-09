@@ -19,21 +19,20 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, fields
+from openerp import fields, models
 
-class account_tax(osv.osv):
+class account_tax(models.Model):
     _inherit = 'account.tax'
-    _columns = {
-              'type_sii': fields.selection([
-                        ('comun','Comun'),
-                        ('no_recuperable','No Recuperable'),
-                        ('otro','Otro') 
-                        ], 'Tipo sii'),    
-              'type_tax_sii': fields.selection([
-                        ('1','IVA'),
-                        ('2','Ley 18.211'),
-                        ], 'Tipo sii'),    
-}
+    type_sii = fields.Selection([
+                                    ('comun','Comun'),
+                                    ('no_recuperable','No Recuperable'),
+                                    ('otro','Otro') 
+                                    ], 'Tipo Impuesto sii')    
+    type_tax_sii = fields.Selection([
+                                        ('1','IVA'),
+                                        ('2','Ley 18.211'),
+                                        ], 'Tipo sii')    
+
     _defaults = {
         'type_sii' : 'comun',
         'type_tax_sii' : '1',
@@ -41,11 +40,10 @@ class account_tax(osv.osv):
             
 account_tax()
 
-class cod_recargo(osv.osv):
-    _name = 'cod.recargo'
-    _columns = {
-              'name': fields.char('Codigo', size=250, required=True),
-              'code': fields.integer('Descripcion', size=2, required=True),    
-}
+class cod_recargo(models.Model):
+    _name = 'cod.recargo'    
+    name = fields.Char('Codigo', size=250, required=True)
+    code = fields.Integer('Descripcion', size=2, required=True)    
+
 cod_recargo()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#

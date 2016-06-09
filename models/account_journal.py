@@ -19,31 +19,28 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, osv
+from openerp import fields, models
 
-class account_journal(osv.osv):
+class account_journal(models.Model):
     _inherit = 'account.journal'
-    _columns = {
-                'code_sii': fields.selection([
-                            ('33','Facturación Eletrónica'),
-                			('34','Factura No Afecta o Exenta Electrónica'), 
-                			('43','Liquidación-Factura Electrónica'), 
-                			('46','Factura de Compra Electrónica'), 
-                			('52','Guía de Despacho Electrónica'),
-                			('56','Nota de Débito Electrónica'), 
-                			('61','Nota de Crédito Electrónica'),
-                            ('110','Factura de Exportación'),
-                            ('111','Nota de Débito de Exportación'),
-                            ('112','Nota de Crédito de Exportación'),
-                            ('39' ,'Boleta Electronica')
-                            ], 'Codigo SII Chile', required=False),
-                'type_print': fields.selection([
-                        ('1','Facturación'),
-                        ('2','Facturación Eletrónica'), 
-                        ('4','Facturación Eletrónica ChileDar'),
-			('3','Facturación Eletrónica Termica'), 
-                        ], 'Tipo de Impresion'),
-		
-    }
+    code_sii =  fields.Selection([
+                                ('33','Facturación Eletrónica'),
+                                ('34','Factura No Afecta o Exenta Electrónica'), 
+                                ('43','Liquidación-Factura Electrónica'), 
+                                ('46','Factura de Compra Electrónica'), 
+                                ('52','Guía de Despacho Electrónica'),
+                                ('56','Nota de Débito Electrónica'), 
+                                ('61','Nota de Crédito Electrónica'),
+                                ('110','Factura de Exportación'),
+                                ('111','Nota de Débito de Exportación'),
+                                ('112','Nota de Crédito de Exportación'),
+                                ('39' ,'Boleta Electronica')
+                                ], 'Codigo SII Chile', required=False)
+    type_print = fields.Selection([
+                                ('1','Facturación'),
+                                ('2','Facturación Eletrónica'), 
+                                ('4','Facturación Eletrónica ChileDar'),
+                                ('3','Facturación Eletrónica Termica'), 
+                                ], 'Tipo de Impresion')
 account_journal()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -19,41 +19,35 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, osv
+from openerp import fields, models
 import base64
 
 
-class res_users(osv.osv):
+class res_users(models.Model):
     _inherit = 'res.users'
-    _columns = {
-                'user_sii_mail': fields.boolean('Usuario correo SII'),
-    }
+    user_sii_mail = fields.Boolean('Usuario correo SII')
+
 res_users()
 
-class res_partner(osv.osv):    
+class res_partner(models.Model):    
     _inherit = 'res.partner'
-    _columns = {        
-        'name_fantasy': fields.char('Nombre Fantasia', size=250),
-        'giro': fields.char('Giro', size=80),
-        'servicio_basicos' : fields.boolean('Servicio Basicos')
+    name_fantasy = fields.Char('Nombre Fantasia', size=250)
+    giro = fields.Char('Giro', size=80)
+    servicio_basicos = fields.Boolean('Servicio Basicos')
         
-    }
     
 res_partner()
 
-class res_company(osv.osv):    
+class res_company(models.Model):    
     _inherit = 'res.company'
-    _columns = {        
-        'acteco': fields.integer('Acteco', size=6),
-        'p12pass': fields.char('Contraseña', size=50),
-        'filep12': fields.binary('Ingrese Certificado'),
-        'export_filename': fields.char('Nombre del Certificado', size=200),
-        'nroresolucion': fields.integer('Numero resolucion', size=4),
-        'fecharesolucion': fields.date('Fecha resolucion'),
-        'rutenvia': fields.char('RUT Envia', size=32, help="Tax Identification Number. Check the box if this contact is subjected to taxes. Used by the some of the legal statements."),
-                
-    }
-    
+    acteco = fields.Integer('Acteco', size=6)
+    p12pass = fields.Char('Contraseña', size=50)
+    filep12 = fields.Binary('Ingrese Certificado')
+    export_filename = fields.Char('Nombre del Certificado', size=200)
+    nroresolucion = fields.Integer('Numero resolucion', size=4)
+    fecharesolucion = fields.Date('Fecha resolucion')
+    rutenvia = fields.Char('RUT Envia', size=32, help="Tax Identification Number. Check the box if this contact is subjected to taxes. Used by the some of the legal statements.")
+                    
     def write(self, cr, uid, ids, args, context=None):
         res = super(res_company, self).write(cr, uid, ids, args, context)
         if args.has_key('filep12') and args['filep12']:

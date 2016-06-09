@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-   		<!-- Documentos Emitidos Vista Tree --> 
-		<record id="doc_emitidos_tree" model="ir.ui.view">
+		<record id="view_invoice_emitidos_tree" model="ir.ui.view">
 			<field name="name">account.invoice.emitidos.tree</field>
 			<field name="model">account.invoice.emitidos</field>
 			<field name="arch" type="xml">
-				<tree string="Emitidos" create="false" delete="false" edit="false" >
+				<tree string="Emitidos" create="false" edit="false">
 					<field name='invoice' />
 					<field name='code_sii' />
 					<field name='date' />

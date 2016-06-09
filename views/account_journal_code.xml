@@ -7,9 +7,13 @@
 			<field name='inherit_id' ref='account.view_account_journal_form' />
 			<field name="priority" eval="20" />
 			<field name="arch" type="xml">
-				<xpath expr="//field[@name='analytic_journal_id']" position="after">					                                       
-                    <field name="code_sii"/>
-		    <field name="type_print" />
+				<xpath expr="//notebook" position="inside">
+					<page string="SII">
+					    <group col="4" colspan="2">		
+		                    <field name="code_sii"/>
+				    		<field name="type_print" />
+						</group>
+					</page>
 				</xpath>
 			</field>
 		</record>

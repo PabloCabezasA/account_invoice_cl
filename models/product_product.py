@@ -19,20 +19,23 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, osv
+from openerp import fields, models
 
-class codigo_producto_cambio_sujeto(osv.osv):
+class codigo_producto_cambio_sujeto(models.Model):
     _name = 'codigo.producto.cambio.sujeto'
-    _columns = {   
-        'name' : fields.char('Nombre', size=50, required=True)
-    }
+    name =  fields.Char('Nombre', size=50, required=True)
+
 codigo_producto_cambio_sujeto()
 
-class product_product(osv.osv):
+class product_product(models.Model):
     _inherit = 'product.product'
-    _columns = {   
-        'cpcs_id' : fields.many2one('codigo.producto.cambio.sujeto', 'Tipo Codigo Producto')
-    }
+    cpcs_id = fields.Many2one('codigo.producto.cambio.sujeto', 'Tipo Codigo Producto')
 product_product()
+
+class product_template(models.Model):
+    _inherit = 'product.template'
+    cpcs_id = fields.Many2one('codigo.producto.cambio.sujeto', 'Tipo Codigo Producto')
+product_template()
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -22,5 +22,17 @@
             </xpath>
 		</field>
 	</record>	
+	
+   	<record model="ir.ui.view" id="view_respartner_form_sii">
+		<field name="name">res.partner.form.sii</field>
+		<field name="model">res.partner</field>
+		<field name='inherit_id' ref='base.view_partner_form' />
+		<field name="arch" type="xml">
+			<xpath expr="//field[@name='street']" position="before">					                                       
+                   <field name="giro"/>
+			</xpath>
+		</field>
+	</record>
+	
 </data>
 </openerp> 

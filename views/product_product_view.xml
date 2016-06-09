@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-			<record model="ir.ui.view" id="product_product_form_id">
-			<field name="name">product.product.form</field>
-			<field name="model">product.product</field>
-			<field name='inherit_id' ref='product.product_normal_form_view' />
-			<field name="arch" type="xml">
-				<xpath expr="//field[@name='default_code']" position="before">			
-					<field name="cpcs_id" />
-				</xpath>
-												
-			</field>	
-			</record>
+    <record model="ir.ui.view" id="product_product_formsii_id">
+		<field name="name">product.product.form</field>
+		<field name="model">product.template</field>
+		<field name='inherit_id' ref="product.product_template_form_view" />
+		<field name="arch" type="xml">
+			<xpath expr="//notebook" position="inside">
+				<page string="SII">
+				    <group col="4">
+						<field name="cpcs_id" />
+					</group>
+				</page>
+			</xpath>
+		</field>	
+	</record>
     </data>
 </openerp>

@@ -6,7 +6,7 @@
 	    	<field name="name">config.dte.invoice.form</field>
 	        <field name="model">config.dte.invoice</field>
 	        <field name="arch" type="xml">
-		        <form string="Cuentas por Defecto" version="7.0">
+		        <form string="Cuentas por Defecto">
 		        	<sheet>
 		        		<group colspan="2" >
                         	<group>
