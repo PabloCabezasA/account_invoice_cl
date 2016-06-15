@@ -21,12 +21,8 @@
 
 from openerp import fields, models, api
 from openerp.exceptions import except_orm, Warning, RedirectWarning
-from lxml import etree
-import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 import datetime
-from datetime import date
-import time
 import base64 , os
 from elaphe import barcode
 import smtplib
@@ -35,7 +31,6 @@ from email.mime.multipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email import encoders
 import unicodedata
-import json
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -74,85 +69,38 @@ class account_invoice(models.Model):
     amount_base = fields.Integer('Base Imponible ($)', max_length = 32, readonly=True)
 
 
-
-    def print_pdf47(self,cr,uid,ids,context=None):
-        invoice_obj = self.pool.get('account.invoice')
-        xml_data = invoice_obj.browse(cr, uid, ids)[0]        
-        xml_factura = self.crear_dte(cr, uid, ids)
-        par_firmador = self.validar_parametros_firmador(cr, uid)
-        self.validar_parametros_certificado(cr, uid, xml_data.company_id)
-        par_caf = self.validar_parametros_caf(cr, uid, xml_data.journal_id.code_sii)
-        file_name = self.limpiar_campo_slash(xml_data.number)                        
+    @api.model
+    def print_pdf47(self):
+        xml_factura = self.crear_dte(self)
+        par_firmador = self.validar_parametros_firmador()
+        self.validar_parametros_certificado(self.company_id)
+        par_caf = self.validar_parametros_caf(self.journal_id.code_sii)
+        file_name = self.limpiar_campo_slash(self.number)
         file_name += '_'+datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         path = self.crear_archivo(xml_factura, file_name+'.xml')                        
-        data = self._info_for_facturador(cr, uid, xml_data, par_caf, par_firmador, path, 'account.invoice')        
+        data = self._info_for_facturador(self, par_caf, par_firmador, path, 'account.invoice')
         try:
-            ted = self.pool.get('firmador.firmador').fimar_cliente(cr, uid, [xml_data.id], data, context=None)        
+            ted = self.env['firmador.firmador'].fimar_cliente([self.id], data, None)
         except:            
             os.remove(path)
-        self.funcion_pdf47(cr, uid, ids, ted['respuesta'])
+        self.funcion_pdf47(ted['respuesta'])
 
-    def print_for_idiots(self,cr,uid,ids,context=None):
-        journal_id = False
-        if not context:
-            context = {}
-
-        if ids:
-            invoice = self.browse(cr, uid, ids[0], context)
-        else:raise Warning('Error al imprimir, Primero Guardar Factura')
-
-        
-        if context.has_key('journal_id'):
-            journal_id = context['journal_id']
-            journal_obj = self.pool.get('account.journal').browse(cr,uid,journal_id)
-        
-        if journal_id:            
-            journal_obj.name
-            datas = {
-             'ids': ids,
-             'model': 'account.invoice',             
-             }            
-            if journal_obj.type_print =='2':                
-                if not invoice.te_factura:
-                    self.print_pdf47(cr, uid, ids, context)
-
-                return {
-                        'type': 'ir.actions.report.xml',
-                        'report_name': 'factura_elect',
-                        'datas': datas,
-                        'nodestroy' : True
-                        }
-            elif journal_obj.type_print =='1':    
-                return {
-                    'type': 'ir.actions.report.xml',
-                    'report_name': 'account.invoice',
-                    'datas': datas,
-                    'nodestroy' : True
-                }                        
-            elif journal_obj.type_print =='3':
-                if not invoice.te_factura:
-                    self.print_pdf47(cr, uid, ids, context)
-                return {
-                    'type': 'ir.actions.report.xml',
-                    'report_name': 'factura_elec_t',
-                    'datas': datas,
-                    'nodestroy' : True
-                }
-            elif journal_obj.type_print =='4':
-                if not invoice.te_factura:
-                    self.print_pdf47(cr, uid, ids, context)
-                return {
-                    'type': 'ir.actions.report.xml',
-                    'report_name': 'factura_elec_n_t',
-                    'datas': datas,
-                    'nodestroy' : True
-                }
-	    
+    @api.multi
+    def print_for_idiots(self):
+        if self.journal_id:
+            self.ensure_one()
+            self.sent = True
+            if self.journal_id.type_print =='2':
+                if not self.te_factura:
+                    self.print_pdf47()
+                return self.env['report'].get_action(self, 'account_invoice_cl.report_sii_invoice_cl')
+            elif self.journal_id.type_print =='1':
+                return self.env['report'].get_action(self, 'account.report_invoice')
             raise Warning('Error al imprimir, Agregar Tipo de Impresion a Diario')
         else : 
             raise Warning('Error al imprimir, no se encuentra diario')
         
-    @api.one
+    @api.returns('account.config.firma')
     def validar_parametros_firmador(self):
         context = {}
         acf_obj = self.env['account.config.firma']
@@ -160,7 +108,7 @@ class account_invoice(models.Model):
             return acf
         raise Warning('Error al crear xml. Favor crear parametros del firmador')
 
-    @api.one
+    @api.returns('account.invoice.folios')
     def validar_parametros_caf(self, code_sii):
         caf_obj = self.env['account.invoice.folios']
         for caf in caf_obj.search([('code_sii','=', code_sii),('state_folio','=', '2')], limit=1):
@@ -430,13 +378,14 @@ class account_invoice(models.Model):
                 }
         _logger.info('Enviando al Facturador Estos datos %s' % data)
         return data
-    
-    def funcion_pdf47(self,cr,uid,ids,te_factura):
+
+    @api.model
+    def funcion_pdf47(self, te_factura):
         path = os.getcwd() + '/%s'
         barcode('pdf417', te_factura, options=dict(eclevel=5, columns=15, rows=15), scale=2, data_mode='8bits').save(path % 'te_factura.png')
         with open(path % 'te_factura.png', "rb") as image_file:
             binary = base64.b64encode(image_file.read())
-            self.pool.get('account.invoice').write(cr, uid, ids,{'te_factura': binary})
+            self.write({'te_factura': binary})
             os.remove(path % 'te_factura.png')
 
     
@@ -451,7 +400,7 @@ class account_invoice(models.Model):
         if not  product_d.default_code:                
             raise Warning('Error al crear xml. Favor ingrasar campo codigo(default_code) en producto %s ' % self.special(product_d['name']))
         
-    @api.one     
+    @api.returns('res.partner')
     def limpiar_campos_emisor_xml(self, emisor):        
         if not  emisor.vat:                
             raise Warning('Error al crear xml. Favor ingrasar campo rut en partner de company')            
@@ -550,7 +499,7 @@ class account_invoice(models.Model):
         archi.close()
         return path
 
-    @api.one
+    @api.returns('account.tax')
     def buscar_impuesto_en_factura(self, invoice_id, context=None):                
         tax_id = []
         for line in invoice_id.invoice_line_ids:

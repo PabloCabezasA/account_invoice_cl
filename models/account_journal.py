@@ -38,8 +38,7 @@ class account_journal(models.Model):
                                 ], 'Codigo SII Chile', required=False)
     type_print = fields.Selection([
                                 ('1','Facturación'),
-                                ('2','Facturación Eletrónica'), 
-                                ('4','Facturación Eletrónica ChileDar'),
+                                ('2','Facturación Eletrónica'),
                                 ('3','Facturación Eletrónica Termica'), 
                                 ], 'Tipo de Impresion')
 account_journal()

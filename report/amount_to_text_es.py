@@ -24,7 +24,7 @@
 #-------------------------------------------------------------
 #SPANISH
 #-------------------------------------------------------------
-from tools.translate import _
+from openerp.tools.translate import _
 
 units_29 = ( 'CERO', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS',
           'SIETE', 'OCHO', 'NUEVE', 'DIEZ', 'ONCE', 'DOCE',

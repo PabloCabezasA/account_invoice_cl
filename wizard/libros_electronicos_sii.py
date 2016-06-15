@@ -18,96 +18,100 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.osv import fields, osv
-import openerp.exceptions
-
+from openerp.osv import  osv
+from openerp import fields, api
+from openerp.exceptions import except_orm, Warning, RedirectWarning
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import base64
 import os
 
 class LibrosElectronicosSii(osv.osv_memory):
     _name = "libros.electronicos.sii"
-    
-    _columns={
-             'company_id' : fields.many2one('res.company', 'Compañia'),
-             'period_id' : fields.many2one('account.period', 'Periodo'),                           
-             'xml_name': fields.char('Nombre xml', size=200 ),
-             'xml_file': fields.binary('XMLFILE'),
-             'to_test': fields.boolean('Set de Prueba'),
-             'type': fields.selection([
+    company_id = fields.Many2one('res.company', 'Compañia')
+    period_id = fields.Date('Periodo')                           
+    xml_name = fields.Char('Nombre xml', size=200 )
+    xml_file = fields.Binary('XMLFILE')
+    to_test = fields.Boolean('Set de Prueba')
+    type = fields.Selection([
                             ('mensual','Mensual'),
                             #('especial','Especial'),
                             #('rectifica','Rectifica'), 
-                            ], 'Tipo', required=True),              
+    ], 'Tipo', required=True)              
+    
+    type_send = fields.Selection([
+                    ('total','Total'),
+                    ('final','Final'), 
+                    ], 'Tipo', help="TOTAL =Información total del mes. Si no se incluye, se asume que es total.\n"+                                             
+                    "FINAL = Corresponde al último segmento"
+                    , required=True)              
+    type_book  = fields.Selection([
+                                ('compra','Libro de Compra'),
+                                ('venta','Libro de Venta'), 
+                                ], 'Tipo de Libro', required=True)              
 
-             'type_send': fields.selection([
-                            ('total','Total'),
-                            ('final','Final'), 
-                            ], 'Tipo', help="TOTAL =Información total del mes. Si no se incluye, se asume que es total.\n"+                                             
-                                            "FINAL = Corresponde al último segmento"
-            , required=True),              
-             'type_book': fields.selection([
-                            ('compra','Libro de Compra'),
-                            ('venta','Libro de Venta'), 
-                            ], 'Tipo de Libro', required=True)              
-    }    
-    def create_file(self, cr, uid, ids, context=None):
-        this = self.browse(cr, uid, ids[-1], context)
-        invoice = self.pool.get('account.invoice')
-        transmitter = self.pool.get('res.partner').browse(cr, uid, this.company_id.partner_id.id,)
-        transmitter = invoice.limpiar_campos_emisor_xml(cr, uid, transmitter)
-        invoice.validar_parametros_certificado(cr, uid, this.company_id)
-        if this.type_book == 'compra':
-            type = 'CV' + self.format_period(this.period_id).replace('-', '')
+    @api.multi
+    def create_file(self):
+        invoice = self.env['account.invoice']
+        transmitter = self.env['res.partner'].browse(self.company_id.partner_id.id)
+        transmitter = invoice.limpiar_campos_emisor_xml(transmitter)
+        invoice.validar_parametros_certificado(self.company_id)
+        date_start = datetime.strptime(self.period_id, "%Y-%m-%d") - relativedelta(day=1)
+        date_start = datetime.strftime(date_start, "%Y-%m-%d")
+        date_fin = datetime.strptime(self.period_id, "%Y-%m-%d") - relativedelta(day=31)
+        date_fin = datetime.strftime(date_fin, "%Y-%m-%d")
+
+        if self.type_book == 'compra':
+            type = 'CV' + self.format_period(date_start).replace('-', '')
             name_file = 'LibroDeCompra_%s.xml' % datetime.now().strftime('%Y%m%d%H%M%S')
             sql_type = 'in%'
         else:
-            type = 'VV' + self.format_period(this.period_id).replace('-', '')
+            type = 'VV' + self.format_period(date_start).replace('-', '')
             name_file = 'LibroDeVenta_%s.xml' % datetime.now().strftime('%Y%m%d%H%M%S')
             sql_type = 'out%'
-        front_page = self.create_fromt_page(this, cr, uid, ids, transmitter, context)
-        resume, invoices = self.create_resume_period(this, cr, uid, ids, sql_type, context)
+        front_page = self.create_fromt_page(transmitter, date_start)
+        resume, invoices = self.create_resume_period(sql_type, date_start, date_fin)
         detail = False
         valid = False
-        id_doc = self.format_period(this.period_id)
-        if invoices and this.type_send == 'total':
+        id_doc = self.format_period(self.period_id)
+        if invoices and self.type_send == 'total':
             valid = True
-            detail = self.create_detail(cr, uid, ids, invoices, this.type_book)
+            detail = self.create_detail(invoices, self.type_book)
         try:
             path, file = self.get_file(front_page, resume, detail, valid, type, name_file, id_doc)            
         except:
             os.remove('/tmp/'+name_file)
-            raise openerp.exceptions.Warning('Error al crear xml. Favor contactar al administrador del sistema')
+            raise Warning('Error al crear xml. Favor contactar al administrador del sistema')
         try:
-            self.signature_book(cr, uid, ids, path, this, name_file)
+            self.signature_book(path, name_file)
         except:
             os.remove('/tmp/'+name_file)
-            raise openerp.exceptions.Warning('Error al crear xml. Fallo Libreria Facturisa')
+            raise Warning('Error al crear xml. Fallo Libreria Facturisa')
             
-        mod_obj = self.pool.get('ir.model.data')
-        res = mod_obj.get_object_reference(cr, uid, 'account_invoice_cl', 'libroelectronicosii_form')        
+        mod_obj = self.env['ir.model.data']
+        res = mod_obj.get_object_reference('account_invoice_cl', 'libroelectronicosii_form')
         return {
             'name': 'Libros Electronicos S.I.I',
+            'context': self._context,
             'view_type': 'form',
             'view_mode': 'form',
-            'view_id': [res and res[1] or False],
             'res_model': 'libros.electronicos.sii',
-            'context': "{}",
             'type': 'ir.actions.act_window',
-            'nodestroy': True,
-            'target': 'new',
-            'res_id': ids[0]  or False,##please replace record_id and provide the id of the record to be opened 
+            'views': [(res[1], 'form')],
+            'res_id': self.id,
+            'target': 'new',             
         }
 
-    def signature_book(self, cr, uid, ids, path, this, name_file):
-        par_firmador = self.pool.get('account.invoice').validar_parametros_firmador(cr, uid)
+    @api.model
+    def signature_book(self, path, name_file):
+        par_firmador = self.env['account.invoice'].validar_parametros_firmador()
         data ={ 'path' : path,
-                'cert': par_firmador.pathcertificado + this.company_id.export_filename, 
-                'passwd' :this.company_id.p12pass if this.company_id.p12pass else '',
+                'cert': par_firmador.pathcertificado + self.company_id.export_filename, 
+                'passwd' :self.company_id.p12pass if self.company_id.p12pass else '',
                 'name' : '/tmp/f_' + name_file, 
                 'pathbase' : par_firmador.pathbase
                 }
-        self.pool.get('firmador.firmador').firmar_libro_sii(cr, uid, ids, data, None)
+        self.env['firmador.firmador'].firmar_libro_sii(data)
         with open('/tmp/f_' + name_file, 'r') as myfile:
             b64data = base64.b64encode(myfile.read())            
             myfile.close()
@@ -115,10 +119,11 @@ class LibrosElectronicosSii(osv.osv_memory):
             with open(path, 'r') as myfile:
                 b64data = base64.b64encode(myfile.read())            
                 myfile.close()            
-        self.write(cr, uid, ids[0], {'xml_file': b64data, 'xml_name' : name_file })
+        self.write({'xml_file': b64data, 'xml_name' : name_file })
         os.remove(path)
         os.remove('/tmp/f_'+name_file)
-            
+      
+    @api.model       
     def get_file(self, front, resume, detail, valid, type, name_file, id_doc):
         file = '<?xml version="1.0" encoding="ISO-8859-1"?>'
         file += '<LibroCompraVenta xmlns="http://www.sii.cl/SiiDte" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sii.cl/SiiDte LibroCV_v10.xsd" version="1.0">'
@@ -135,37 +140,41 @@ class LibrosElectronicosSii(osv.osv_memory):
         file.encode('ISO-8859-1')
         path = '/tmp/'+name_file
         vfile=open(path,'a+b')
-        vfile.write(self.pool.get('account.invoice').special(file))                                
+        vfile.write(self.env['account.invoice'].special(file))                                
         vfile.close()        
         return path, file
-                
-    def create_fromt_page(self, this, cr, uid, ids, transmitter, context=None):
-        invoice = self.pool.get('account.invoice')
+    
+    @api.model        
+    def create_fromt_page(self, transmitter, date_start):
+        invoice = self.env['account.invoice']
         front_page = ''
         front_page += '<Caratula>'
-        front_page += '<RutEmisorLibro>'+ invoice.validar_rut(this.company_id.vat) +'</RutEmisorLibro>'
-        front_page += '<RutEnvia>'+ invoice.validar_rut(this.company_id.rutenvia) +'</RutEnvia>'
-        front_page += '<PeriodoTributario>'+ self.format_period(this.period_id) +'</PeriodoTributario>'
-        front_page += '<FchResol>'+ this.company_id.fecharesolucion +'</FchResol>'
-        front_page += '<NroResol>'+ str(this.company_id.nroresolucion) +'</NroResol>'
-        front_page += '<TipoOperacion>'+ this.type_book.upper() +'</TipoOperacion>'
-        front_page += '<TipoLibro>'+this.type.upper() +'</TipoLibro>'
-        front_page += '<TipoEnvio>'+this.type_send.upper() +'</TipoEnvio>'
+        front_page += '<RutEmisorLibro>'+ invoice.validar_rut(self.company_id.vat) +'</RutEmisorLibro>'
+        front_page += '<RutEnvia>'+ invoice.validar_rut(self.company_id.rutenvia) +'</RutEnvia>'
+        front_page += '<PeriodoTributario>'+ self.format_period(date_start) +'</PeriodoTributario>'
+        front_page += '<FchResol>'+ self.company_id.fecharesolucion +'</FchResol>'
+        front_page += '<NroResol>'+ str(self.company_id.nroresolucion) +'</NroResol>'
+        front_page += '<TipoOperacion>'+ self.type_book.upper() +'</TipoOperacion>'
+        front_page += '<TipoLibro>'+self.type.upper() +'</TipoLibro>'
+        front_page += '<TipoEnvio>'+self.type_send.upper() +'</TipoEnvio>'
         front_page += '</Caratula>'
         return front_page 
 
-    def create_resume_period(self, this, cr, uid, ids, type, context=None):
-        invoice_obj = self.pool.get('account.invoice')
-        cr.execute("""select id from account_invoice 
+    @api.model
+    def create_resume_period(self, type, date_start, date_stop):
+        invoice_obj = self.env['account.invoice']
+        self.env.cr.execute("""select id from account_invoice 
                         where type like '%s' and state not in ('draft', 'cancel') 
-                        and company_id = %d and period_id = %d and to_setest = %s
-                     order by type""" % ( type, this.company_id.id, this.period_id.id, this.to_test))
-        invoice_ids = map(lambda x:x[0], cr.fetchall())
-        invoices = self.group_invoice_by_type(cr, uid, invoice_ids)        
+                        and company_id = %d
+                        and date_invoice between '%s' and  '%s' 
+                        and to_setest = %s
+                     order by type""" % ( type, self.company_id.id, date_start, date_stop, self.to_test))
+        invoice_ids = map(lambda x:x[0], self.env.cr.fetchall())
+        invoices = self.group_invoice_by_type(invoice_ids)        
         resume = ''
         resume += '<ResumenPeriodo>'
         for key in invoices.keys():
-            totales, tax_obj = self.calc_totals(cr, uid, invoices[key])                 
+            totales, tax_obj = self.calc_totals(invoices[key])                 
             resume +='<TotalesPeriodo>'
             resume +='<TpoDoc>'+ str(key) +'</TpoDoc>'
             resume +='<TotDoc>'+ str(len(invoices[key])) +'</TotDoc>'
@@ -191,16 +200,18 @@ class LibrosElectronicosSii(osv.osv_memory):
             resume +='</TotalesPeriodo>'
         resume += '</ResumenPeriodo>'
         return resume, invoices
-
+    
+    @api.model
     def format_amount_integer(self, amount):        
         return str(int(round(amount)))
 
-    def create_detail(self, cr, uid, ids, invoices, type):
-        inv_obj = self.pool.get('account.invoice')
+    @api.model
+    def create_detail(self, invoices, type):
+        inv_obj = self.env['account.invoice']
         detail = ''
         for key in invoices.keys():
             for inv in invoices[key]:
-                totales, tax_obj = self.calc_totals(cr, uid, [inv])
+                totales, tax_obj = self.calc_totals([inv])
                 detail += '<Detalle>'
                 detail += '<TpoDoc>'+ inv.journal_id.code_sii +'</TpoDoc>'
                 if type == 'compra':
@@ -212,7 +223,7 @@ class LibrosElectronicosSii(osv.osv_memory):
                     detail +='<Anulado>A</Anulado>'
                     detail +='</Detalle>'
                     continue 
-                impuesto_obj = inv_obj.buscar_impuesto_en_factura(cr, uid, inv, False)
+                impuesto_obj = inv_obj.buscar_impuesto_en_factura(inv, False)
                 if impuesto_obj:
                     detail += '<TpoImp>'+ impuesto_obj.type_tax_sii +'</TpoImp>'
                     detail += '<TasaImp>'+ "{0:.2f}".format(impuesto_obj.amount * 100) +'</TasaImp>'
@@ -242,29 +253,32 @@ class LibrosElectronicosSii(osv.osv_memory):
                 detail += '<MntTotal>'+ self.format_amount_integer(totales['total']) +'</MntTotal>'
                 detail += '</Detalle>'
         return detail
-        
-    def format_period(self, period):
-        date = datetime.strptime(period.date_start,'%Y-%m-%d')        
+    
+    @api.model
+    def format_period(self, period):        
+        date = datetime.strptime(period,'%Y-%m-%d')        
         return '{0}-{1}'.format(date.year, date.strftime('%m'))
     
-    def group_invoice_by_type(self, cr, uid, invoice_ids):
+    @api.model
+    def group_invoice_by_type(self, invoice_ids):
         invoices = {}
-        for invoice in self.pool.get('account.invoice').browse(cr, uid, invoice_ids):
+        for invoice in self.env['account.invoice'].browse(invoice_ids):
             if invoice.journal_id.code_sii:
                 if invoice.journal_id.code_sii in invoices.keys(): 
                     invoices[invoice.journal_id.code_sii].append(invoice)
                 else:
                     invoices[invoice.journal_id.code_sii] = [invoice]
             else:
-                raise openerp.exceptions.Warning('Error al crear xml. Favor ingresar campo Codigo sii en el diario %s' % invoice.journal_id.name)
+                raise Warning('Error al crear xml. Favor ingresar campo Codigo sii en el diario %s' % invoice.journal_id.name)
         return invoices
-        
-    def calc_totals(self, cr, uid, invoices):
+    
+    @api.model
+    def calc_totals(self, invoices):
         totales = {'neto' : 0, 'iva' : 0, 'exento' : 0, 'total' : 0 ,
                     'no_recaudable' : {}, 'otros_imp': {},'anulados': 0
                    }
         tax_ret = False        
-        tax_obj =self.pool.get('account.tax')
+        tax_obj =self.env['account.tax']
 
         for invoice in invoices:
             lno_rec, lotros = 0,0
@@ -275,17 +289,16 @@ class LibrosElectronicosSii(osv.osv_memory):
             totales['iva'] += invoice.amount_tax
             totales['neto'] +=  invoice.amount_untaxed
             
-            for line in invoice.invoice_line:
-                if not line.invoice_line_tax_id:
+            for line in invoice.invoice_line_ids:
+                if not line.invoice_line_tax_ids:
                     totales['exento'] += line.price_subtotal
-            for line_tax in invoice.tax_line:                                
+            for line_tax in invoice.tax_line_ids:                                
                 name = line_tax.name[line_tax.name.find('-')+1:].strip()                
-                tax = self.get_tax_invoice(cr, uid, name, line_tax)
+                tax = self.get_tax_invoice(name, line_tax)[0]
                 if tax:
-                    tax = tax_obj.browse(cr, uid, tax[0])
                     tax_ret = tax
                     if not tax.type_sii:
-                        raise openerp.exceptions.Warning('Error al crear xml. Favor ingresar campo Tipo sii en el impuesto %s' % tax.name)
+                        raise Warning('Error al crear xml. Favor ingresar campo Tipo sii en el impuesto %s' % tax.name)
                     if tax.type_sii == 'no_recuperable':
                         self.validate_code_rec_other(invoice.codtax_norec, 'Codigo impuesto no recaudable', invoice.number)
                         if invoice.codtax_norec in totales['no_recaudable'].keys():
@@ -306,38 +319,34 @@ class LibrosElectronicosSii(osv.osv_memory):
                 totales['iva'] -= lno_rec 
         return totales, tax_ret  
 
-    def get_tax_invoice(self,cr ,uid, name, line_tax):
+    @api.returns('account.tax')
+    def get_tax_invoice(self, name, line_tax):
         tax_obj =self.pool.get('account.tax')        
-        tax = tax_obj.search(cr , uid,[('name','=', name),('base_code_id','=', line_tax.base_code_id.id)])
-        if not tax:
-            sql = "select src from ir_translation where value = '%s'" % name
-            cr.execute(sql)
-            name = cr.fetchone()
-            if name and name[0] is not None:
-                tax = tax_obj.search(cr , uid,[('name','=', name[0]),('base_code_id','=', line_tax.base_code_id.id)])
+        tax = line_tax.tax_id
         return tax
 
+    @api.model
     def validate_code_rec_other(self, code, type, number):
         if not code:
-            raise openerp.exceptions.Warning('Error al crear xml. Favor ingresar campo %s en Factura %s' % (type, number))        
+            raise Warning('Error al crear xml. Favor ingresar campo %s en Factura %s' % (type, number))        
 
-    def send_file(self, cr, uid, ids ,context=None):
-        this = self.browse(cr, uid ,ids[-1], context)
-        if this.xml_file:
-            par_firmador = self.pool.get('account.invoice').validar_parametros_firmador(cr, uid)
-            path = '/tmp/send_' + this.xml_name
+    @api.multi
+    def send_file(self):
+        if self.xml_file:
+            par_firmador = self.env['account.invoice'].validar_parametros_firmador()
+            path = '/tmp/send_' + self.xml_name
             vfile = open(path,'a+b')
-            vfile.write( base64.decodestring(this.xml_file))
+            vfile.write( base64.decodestring(self.xml_file))
             vfile.close()
             data ={ 'path' : path,
-                    'cert': par_firmador.pathcertificado + this.company_id.export_filename, 
-                    'passwd' :this.company_id.p12pass if this.company_id.p12pass else '',
-                    'name' : par_firmador.pathbase + '/out/resp_sii/resp_' + this.xml_name, 
+                    'cert': par_firmador.pathcertificado + self.company_id.export_filename, 
+                    'passwd' : self.company_id.p12pass if self.company_id.p12pass else '',
+                    'name' : par_firmador.pathbase + '/out/resp_sii/resp_' + self.xml_name, 
                     'pathbase' : par_firmador.pathbase
                     }
-            self.pool.get('firmador.firmador').enviar_libro_sii(cr, uid, ids, data, None)
+            self.env['firmador.firmador'].enviar_libro_sii(data)
         else:
-            raise openerp.exceptions.Warning('Error al enviar xml. Favor primero generar el Libro') 
+            raise Warning('Error al enviar xml. Favor primero generar el Libro') 
 LibrosElectronicosSii()    
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

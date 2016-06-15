@@ -20,14 +20,16 @@
 ##############################################################################
 
 import time
-from report import report_sxw
-from osv import osv, orm
 from elaphe import barcode
 import base64, os
 from amount_to_text_es import amount_to_text_es
+from openerp.osv import osv
+from openerp import api
+from openerp.report import report_sxw
+import time
 
 class te_factura(report_sxw.rml_parse):
-    def __init__(self, cr, uid, name, context=None):
+    def __init__(self, cr, uid, name, context):
         super(te_factura, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time,
@@ -37,9 +39,22 @@ class te_factura(report_sxw.rml_parse):
             'fac_det': self._fac_det,
             '_formato_numero': self._formato_numero,
             '_fecha_escrita' : self._fecha_escrita,
-            '_amount_to_text':self._amount_to_text
+            '_amount_to_text':self._amount_to_text,
+            '_split_name' : self._split_name
 
         })
+    #si el nombre es demasiado largo lo separa en 2 lineas
+    def _split_name(self, name, type):
+        if len(name) > 40:
+            lname = name.split(" ")
+            separator = (len(lname) / 2) +1
+            if type == 'ini':
+                name = " ".join(lname[:separator])
+            else:
+                name = " ".join(lname[separator:])
+        elif type == 'last':
+            name = ''
+        return name
     #Timbre Electronico
     def _data_te(self, ids):
         data = []
@@ -140,19 +155,16 @@ class te_factura(report_sxw.rml_parse):
         date_ready=dia+sep_dia+mes_string+sep_mes+ano                   
         return date_ready
 
-    def _amount_to_text(self, amount):
+    def _amount_to_text(self, amount=None):
         text=''
         currency = 'Peso'
         text = amount_to_text_es(amount, currency)
         return 'SON: '+text
 
+class einvoice_cl_report_parser(osv.AbstractModel):
+    _name = 'report.account_invoice_cl.report_sii_invoice_cl'
+    _inherit = 'report.abstract_report'
+    _template = 'account_invoice_cl.report_sii_invoice_cl'
+    _wrapped_report_class = te_factura
 
-
-try:    
-    report_sxw.report_sxw('report.factura_elect','account.invoice','addons/account_invoice_cl/report/factura_electronica.rml', parser=te_factura, header=False)
-    report_sxw.report_sxw('report.factura_elec_t','account.invoice','addons/account_invoice_cl/report/factura_electronica_t.rml', parser=te_factura, header=False)
-    report_sxw.report_sxw('report.factura_elec_n_t','account.invoice','addons/account_invoice_cl/report/factura_electronica_chiledar.rml', parser=te_factura, header=False)
-except:
-    print 'ya instalado'
-#report_sxw.report_sxw('report.factura_elec','account.invoice','addons/account_invoice_cl/report/factura_electronica.rml', parser=te_factura, header='external')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

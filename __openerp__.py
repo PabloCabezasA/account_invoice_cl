@@ -20,7 +20,7 @@
 ##############################################################################
 {
     "name" : "eInvoice",
-    "version" : "2.0",
+    "version" : "9.0",
     "author" : "Econube - pablo.cabezas@econube.cl, jose.pinto@econube.cl",
     "website" : "www.econube.cl",
     "category" : "Econube",
@@ -87,11 +87,16 @@
             
 
             'workflow/workflow.xml',            
+            'views/librossii.xml',
+            'report/report.xml',
+            'report/invoice_report.xml',
+            'security/ir.model.access.csv'
 #            'views/account_invoice_dte.xml',
 #            'views/stock_picking_view.xml',
 #            'views/wizard_buscar_correo.xml',            
-#	        'views/librossii.xml',
-#            'views/cron_monitor_documentos.xml',            
+
+#            'views/cron_monitor_documentos.xml',
+
 
     ],
 
