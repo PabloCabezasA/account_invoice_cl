@@ -11,5 +11,25 @@
 				</xpath>
 			</field>
 		</record>
+
+        <record model="ir.ui.view" id="view_partner_form_inherit">
+            <field name="name">res.partner.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='street']" position="before" >
+                    <label for="giro" string="Giro" />
+                    <div name="giro">
+                        <field name="giro"/>
+                    </div>
+                        </xpath>
+
+                <xpath expr="//field[@name='email']" position="after">
+                    <field name="servicio_basicos"/>
+                    </xpath>
+
+            </field>
+	    </record>
     </data>
 </openerp>

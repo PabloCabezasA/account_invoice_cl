@@ -68,7 +68,7 @@
             aptitude install xmlsec1
         
                     """,
-    "depends" : ['base','account','base_vat','product','stock','l10n_cl_partner','l10n_cl_toponyms'],    
+    "depends" : ['base','account','base_vat','product','stock','l10n_cl_toponyms'],
 	"data": [
             'workflow/workflow.xml',            
             'views/menu_facturacion_dte.xml',
