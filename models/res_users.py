@@ -18,7 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
+import openerp
 from openerp.osv import fields, osv
 import base64
 
@@ -106,5 +106,8 @@ class res_company(osv.osv):
 
     _constraints = [(check_vat_company, "Rut Envia invalido", ["rutenvia"])]
 
+    _sql_constraints = {
+        ('export_filename_uniq', 'unique(export_filename)', 'Archivo ya registrado')
+    }
 res_company()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#

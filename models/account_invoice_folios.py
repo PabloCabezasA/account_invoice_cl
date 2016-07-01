@@ -20,6 +20,7 @@
 ##############################################################################
 from openerp.osv import fields, osv
 from lxml import objectify
+import openerp
 import base64
 
 class account_invoice_folios(osv.osv):
@@ -82,6 +83,10 @@ class account_invoice_folios(osv.osv):
 			return acf
 		raise openerp.exceptions.Warning('Error al crear la factura. Favor crear parametros del firmador')
 
+
+	_sql_constraints = {
+		('export_filename_uniq', 'unique(export_filename)', 'Archivo ya registrado')
+	}
 		
 account_invoice_folios()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
