@@ -44,7 +44,7 @@ class mail_alias(osv.Model):
         #parte de codigo modificado
         user = self.browse (cr, uid, ids)[0]
         if user.alias_user_id.user_sii_mail == True:
-            domain = 'econube.cl'
+            domain = user.domain_mail_sii
             return dict.fromkeys(ids, domain or "")
         #codigo original    
         ir_config_parameter = self.pool.get("ir.config_parameter")

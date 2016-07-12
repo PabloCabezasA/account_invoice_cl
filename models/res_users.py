@@ -27,6 +27,7 @@ class res_users(osv.osv):
     _inherit = 'res.users'
     _columns = {
                 'user_sii_mail': fields.boolean('Usuario correo SII'),
+                'domain_mail_sii': fields.char('Dominio Correo SII', size=250),
     }
 res_users()
 
