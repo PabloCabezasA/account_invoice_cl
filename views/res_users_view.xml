@@ -11,7 +11,7 @@
                     domain_mail_sii
 				</xpath>
 				<xpath expr="//field[@name='email']" position="before">
-                    <field name="domain_mail_sii"/>
+                    <field name="domain_mail_sii" />
 				</xpath>
 
 			</field>
