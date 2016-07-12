@@ -80,7 +80,8 @@ class account_invoice(osv.osv):
                             ('4','Entregas gratuitas (premios, bonificaciones, etc. ) recibidas'),
                             ('9','Otros')
                             ],'Codigo impuesto no recaudable'),
-                'codtax_imprecargo' : fields.many2one('cod.recargo','codigo impuesto')
+                'codtax_imprecargo' : fields.many2one('cod.recargo','codigo impuesto'),
+                'discount_money': fields.integer('Descuento ($)', max_length=32, readonly=True),
 
     }
 
@@ -510,7 +511,7 @@ class account_invoice(osv.osv):
         return str(str(vat[:len(vat)-1])+'-'+vat[len(vat)-1]).strip()
 
 
-    def enviar_correos(self, pathfirma , partner, data):                                                                                                                                                                                                                                                
+    def enviar_correos(self, pathfirma , partner, data):
         msg = MIMEMultipart()
         destinatario = ['%s <%s>' % (partner.name,partner.email) ] 
         msg['To'] = '%s' % partner.email
