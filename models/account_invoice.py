@@ -527,7 +527,6 @@ class account_invoice(osv.osv):
         adjunto = MIMEBase('multipart', 'mixed')                
         with open(pathfirma, 'r') as myfile:
             adjunto.set_payload(myfile.read())
-            print adjunto
             myfile.close()        
         encoders.encode_base64(adjunto)        
         adjunto.add_header('Content-Disposition', 'attachment', filename='factura.xml')        
