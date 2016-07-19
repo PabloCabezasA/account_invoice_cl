@@ -240,7 +240,7 @@ class account_invoice(osv.osv):
         
         if xml_data.discount_money:
             if not xml_data.type_discount:
-                raise openerp.recordexceptions.Warning('Error, Para Descuentos globales ingresar campo tipo de descuento')        
+                raise openerp.exceptions.Warning('Error, Para Descuentos globales ingresar campo tipo de descuento')
             percentage = self.get_amount_for_discount_global(xml_data.type_discount, xml_data)
             xml_factura +='<DscRcgGlobal>'
             xml_factura +='<NroLinDR>1</NroLinDR>'
