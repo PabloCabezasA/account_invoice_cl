@@ -25,9 +25,10 @@
 							<field name="razonref" attrs="{'required':[('to_setest','=',True)]}"/>			
 							<field name="to_setest" />
 							<field name="codtax_norec" />		
-							<field name="codtax_imprecargo" />																							
+							<field name="codtax_imprecargo" />
+                            <field name="tax_common_id"  />
 						</group>
-						<field name="state_emitidos" />	    
+						<field name="state_emitidos" />
 					</page>
 				</xpath>
 			</field>
@@ -57,7 +58,7 @@
 							<field name="to_setest" />	
 							<field name="codtax_norec" />
 							<field name="codtax_imprecargo" />
-																								
+                            <field name="tax_common_id"  />
 						</group>
 						<field name="state_emitidos" />	    					    					    
 					</page>

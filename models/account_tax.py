@@ -38,8 +38,8 @@ class account_tax(osv.osv):
         'type_sii' : 'comun',
         'type_tax_sii' : '1',
     }
-            
 account_tax()
+
 
 class cod_recargo(osv.osv):
     _name = 'cod.recargo'
@@ -48,4 +48,14 @@ class cod_recargo(osv.osv):
               'code': fields.integer('Descripcion', size=2, required=True),    
 }
 cod_recargo()
+
+
+class TaxUseCommon(osv.osv):
+    _name = 'tax.use.common'
+    _columns = {
+        'name': fields.many2one('account.period', 'Periodo', required=True),
+        'proportionality': fields.float('Proporcionalidad', required=True),
+    }
+
+TaxUseCommon()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:#

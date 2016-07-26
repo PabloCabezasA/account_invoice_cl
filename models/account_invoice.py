@@ -82,7 +82,7 @@ class account_invoice(osv.osv):
                             ],'Codigo impuesto no recaudable'),
                 'codtax_imprecargo' : fields.many2one('cod.recargo','codigo impuesto'),
                 'discount_money': fields.integer('Descuento ($)', max_length=32, readonly=True),
-
+                'tax_common_id': fields.many2one('tax.use.common', 'IVA Uso Comun')
     }
 
     def print_pdf47(self,cr,uid,ids,context=None):

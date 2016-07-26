@@ -50,7 +50,8 @@ class LibrosElectronicosSii(osv.osv_memory):
                             ('compra','Libro de Compra'),
                             ('venta','Libro de Venta'), 
                             ], 'Tipo de Libro', required=True)              
-    }    
+    }
+
     def create_file(self, cr, uid, ids, context=None):
         this = self.browse(cr, uid, ids[-1], context)
         invoice = self.pool.get('account.invoice')
@@ -180,7 +181,13 @@ class LibrosElectronicosSii(osv.osv_memory):
                     resume +='<CodIVANoRec>'+str(key_rec)+'</CodIVANoRec>'
                     resume +='<TotOpIVANoRec>'+str(totales['no_recaudable'][key_rec]['qty'])+'</TotOpIVANoRec>'
                     resume +='<TotMntIVANoRec>'+self.format_amount_integer(totales['no_recaudable'][key_rec]['monto']) +'</TotMntIVANoRec>'
-                    resume +='</TotIVANoRec>'                   
+                    resume +='</TotIVANoRec>'
+            if totales['iva_comun']:
+                resume += '<TotOpIVAUsoComun>'+ str(totales['iva_comun']['qty']) + '</TotOpIVAUsoComun>'
+                resume += '<TotIVAUsoComun>' + self.format_amount_integer(totales['iva_comun']['total']) + '</TotIVAUsoComun>'
+                resume += '<FctProp>' + str(totales['iva_comun']['factor']).replace(',','.') + '</FctProp>'
+                resume += '<TotCredIVAUsoComun>'+ self.format_amount_integer(totales['iva_comun']['total_credito']) +'</TotCredIVAUsoComun>'
+
             resume +='<TotMntTotal>'+ self.format_amount_integer(totales['total']) +'</TotMntTotal>'
             if totales['otros_imp']:
                 for key_rec in totales['otros_imp'].keys():
@@ -223,14 +230,18 @@ class LibrosElectronicosSii(osv.osv_memory):
                 detail += '<RznSoc>'+ inv_obj.xmlescape(inv.partner_id.name) +'</RznSoc>'
                 detail += '<MntExe>'+ self.format_amount_integer(totales['exento']) +'</MntExe>'
                 detail += '<MntNeto>'+ self.format_amount_integer(totales['neto']) +'</MntNeto>'
-                
+
                 if totales['no_recaudable']:
                     for key_rec in totales['no_recaudable'].keys():
                         detail += '<IVANoRec>'
                         detail += '<CodIVANoRec>'+str(key_rec)+'</CodIVANoRec>'
                         detail += '<MntIVANoRec>'+ self.format_amount_integer(totales['no_recaudable'][key_rec]['monto'])+'</MntIVANoRec>'
-                        detail += '</IVANoRec>' 
-                elif totales['otros_imp']:
+                        detail += '</IVANoRec>'
+
+                if totales['iva_comun']:
+                    detail += '<IVAUsoComun>' + self.format_amount_integer(totales['iva_comun']['total']) + '</IVAUsoComun>'
+
+                if totales['otros_imp']:
                     for key_rec in totales['otros_imp'].keys():
                         detail += '<OtrosImp>'
                         detail += '<CodImp>'+ str(key_rec)+'</CodImp>'
@@ -239,6 +250,7 @@ class LibrosElectronicosSii(osv.osv_memory):
                         detail += '</OtrosImp>'
                 else:
                     detail += '<MntIVA>'+ self.format_amount_integer(totales['iva']) +'</MntIVA>'
+
                 detail += '<MntTotal>'+ self.format_amount_integer(totales['total']) +'</MntTotal>'
                 detail += '</Detalle>'
         return detail
@@ -261,7 +273,7 @@ class LibrosElectronicosSii(osv.osv_memory):
         
     def calc_totals(self, cr, uid, invoices):
         totales = {'neto' : 0, 'iva' : 0, 'exento' : 0, 'total' : 0 ,
-                    'no_recaudable' : {}, 'otros_imp': {},'anulados': 0
+                    'no_recaudable' : {}, 'otros_imp': {},'anulados': 0, 'iva_comun': {}
                    }
         tax_ret = False        
         tax_obj =self.pool.get('account.tax')
@@ -274,7 +286,20 @@ class LibrosElectronicosSii(osv.osv_memory):
             totales['total'] += invoice.amount_total
             totales['iva'] += invoice.amount_tax
             totales['neto'] +=  invoice.amount_untaxed
-            
+            if invoice.tax_common_id:
+                if totales['iva_comun'].get('name', False):
+                    if totales['iva_comun'].get('name') != invoice.tax_common_id.name.name:
+                        raise openerp.exceptions.Warning(\
+                            'Error al crear xml. Diferentes Iva uso communt en el mismo periodo %s' % invoice.number)
+                    else:
+                        totales['iva_comun']['qty'] += 1
+                        totales['iva_comun']['total'] += invoice.amount_untaxed * totales['iva_comun']['factor']
+                else:
+                    totales['iva_comun']['name'] = invoice.tax_common_id.name.name
+                    totales['iva_comun']['qty'] = 1
+                    totales['iva_comun']['factor'] =  invoice.tax_common_id.proportionality
+                    totales['iva_comun']['total'] = invoice.amount_untaxed * invoice.tax_common_id.proportionality
+
             for line in invoice.invoice_line:
                 if not line.invoice_line_tax_id:
                     totales['exento'] += line.price_subtotal
@@ -303,8 +328,11 @@ class LibrosElectronicosSii(osv.osv_memory):
                             totales['otros_imp'][invoice.codtax_imprecargo.code] = {'monto' : line_tax.amount, 'qty' : 1}
                         lotros += line_tax.amount
             if invoice.amount_tax:
-                totales['iva'] -= lno_rec 
-        return totales, tax_ret  
+                totales['iva'] -= lno_rec
+        if totales['iva_comun']:
+            totales['iva_comun']['total_credito'] = totales['iva_comun']['total'] * totales['iva_comun']['factor']
+
+        return totales, tax_ret
 
     def get_tax_invoice(self,cr ,uid, name, line_tax):
         tax_obj =self.pool.get('account.tax')        
