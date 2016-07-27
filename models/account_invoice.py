@@ -272,7 +272,7 @@ class account_invoice(osv.osv):
         if impuesto_obj:
             xml_factura += '<TasaIVA>' + "{0:.2f}".format(impuesto_obj.amount * 100) + '</TasaIVA>'
         else:
-            xml_factura += '<TasaIVA>'+'0'+'</TasaIVA>'
+            xml_factura += '<TasaIVA>'+'0.00'+'</TasaIVA>'
         xml_factura += '<IVA>' + str(int(xml_data.amount_tax)) + '</IVA>'
         return xml_factura
 
