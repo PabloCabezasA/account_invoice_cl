@@ -237,11 +237,9 @@ class LibrosElectronicosSii(osv.osv_memory):
                         detail += '<CodIVANoRec>'+str(key_rec)+'</CodIVANoRec>'
                         detail += '<MntIVANoRec>'+ self.format_amount_integer(totales['no_recaudable'][key_rec]['monto'])+'</MntIVANoRec>'
                         detail += '</IVANoRec>'
-
-                if totales['iva_comun']:
+                elif totales['iva_comun']:
                     detail += '<IVAUsoComun>' + self.format_amount_integer(totales['iva_comun']['total']) + '</IVAUsoComun>'
-
-                if totales['otros_imp']:
+                elif totales['otros_imp']:
                     for key_rec in totales['otros_imp'].keys():
                         detail += '<OtrosImp>'
                         detail += '<CodImp>'+ str(key_rec)+'</CodImp>'
@@ -250,7 +248,6 @@ class LibrosElectronicosSii(osv.osv_memory):
                         detail += '</OtrosImp>'
                 else:
                     detail += '<MntIVA>'+ self.format_amount_integer(totales['iva']) +'</MntIVA>'
-
                 detail += '<MntTotal>'+ self.format_amount_integer(totales['total']) +'</MntTotal>'
                 detail += '</Detalle>'
         return detail
